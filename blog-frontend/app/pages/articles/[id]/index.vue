@@ -1,4 +1,9 @@
 <template>
+  <!-- Reading progress bar -->
+  <div class="reading-progress">
+    <div class="reading-progress-fill" :style="{ width: readProgress + '%' }"></div>
+  </div>
+
   <div class="article-detail">
     <!-- Loading -->
     <div v-if="status === 'pending'" class="detail-loading">
@@ -16,7 +21,13 @@
 
     <!-- Article Content -->
     <template v-else-if="article">
+      <ArticleToc />
       <article class="article-container">
+        <!-- Hero Banner -->
+        <div class="article-hero-banner" aria-hidden="true">
+          <div class="article-hero-img"></div>
+          <div class="article-hero-fade"></div>
+        </div>
         <!-- Article Header -->
         <header class="article-header">
           <NuxtLink to="/" class="back-link">← 返回文章列表</NuxtLink>
@@ -157,6 +168,13 @@
         </section>
       </article>
     </template>
+
+    <!-- Back to top button -->
+    <Teleport to="body">
+      <Transition name="backtop">
+        <button v-if="showBackTop" class="back-to-top" @click="scrollToTop" aria-label="回到顶部">↑</button>
+      </Transition>
+    </Teleport>
 
     <!-- Delete Confirmation Modal -->
     <Teleport to="body">
@@ -343,8 +361,22 @@ async function handleDeleteComment(commentId) {
   }
 }
 
+// Reading progress + back-to-top
+const readProgress = ref(0)
+const showBackTop = ref(false)
+
+function scrollToTop() {
+  window.scrollTo({ top: 0, behavior: 'smooth' })
+}
+
 onMounted(() => {
   loadComments()
+
+  window.addEventListener('scroll', () => {
+    const h = document.documentElement.scrollHeight - window.innerHeight
+    readProgress.value = h > 0 ? Math.min(100, window.scrollY / h * 100) : 0
+    showBackTop.value = window.scrollY > 400
+  }, { passive: true })
 })
 
 // Markdown rendering is now handled by MarkdownRenderer component
@@ -381,6 +413,74 @@ function formatDate(dateStr) {
 </script>
 
 <style scoped>
+/* ===== Reading Progress ===== */
+.reading-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: rgba(255,255,255,0.06);
+  z-index: 200;
+}
+
+.reading-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--color-accent), var(--color-accent-cyan));
+  transition: width 0.12s linear;
+}
+
+/* ===== Back to Top ===== */
+.back-to-top {
+  position: fixed;
+  bottom: 7rem;
+  right: 1.8rem;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--glass-bg-strong);
+  border: 1px solid var(--glass-border-accent);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  color: var(--color-accent);
+  font-size: 1.1rem;
+  cursor: pointer;
+  z-index: 90;
+  transition: all var(--transition-fast);
+  box-shadow: var(--shadow-glow);
+}
+
+.back-to-top:hover {
+  background: var(--color-accent);
+  color: white;
+  transform: translateY(-3px);
+}
+
+.backtop-enter-active, .backtop-leave-active { transition: all 0.3s; }
+.backtop-enter-from, .backtop-leave-to { opacity: 0; transform: translateY(10px); }
+
+/* ===== Article Hero Banner ===== */
+.article-hero-banner {
+  height: 220px;
+  margin: 0 calc(-1 * var(--space-xl)) var(--space-2xl);
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+}
+
+.article-hero-img {
+  position: absolute;
+  inset: 0;
+  background: url('/images/article-hero.jpg') center / cover;
+  opacity: 0.2;
+}
+
+.article-hero-fade {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, transparent 0%, #0f0c29 100%);
+}
+
 .article-detail {
   min-height: 60vh;
 }

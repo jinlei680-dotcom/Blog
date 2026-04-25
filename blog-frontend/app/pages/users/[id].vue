@@ -412,11 +412,11 @@ function formatDate(dateStr) {
 
 /* ===== Profile Header ===== */
 .profile-header {
-  background: var(--glass-bg);
+  background-image: url('/images/profile-bg.jpg');
+  background-size: cover;
+  background-position: center top;
   border-radius: var(--radius-lg);
   border: 1px solid var(--glass-border);
-  backdrop-filter: var(--glass-blur);
-  -webkit-backdrop-filter: var(--glass-blur);
   box-shadow: var(--glass-shadow);
   padding: var(--space-2xl);
   margin-bottom: var(--space-2xl);
@@ -424,12 +424,25 @@ function formatDate(dateStr) {
   align-items: center;
   justify-content: space-between;
   gap: var(--space-xl);
+  position: relative;
+  overflow: hidden;
+}
+
+.profile-header::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(15, 12, 41, 0.6);
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
 }
 
 .profile-avatar-section {
   display: flex;
   align-items: center;
   gap: var(--space-lg);
+  position: relative;
+  z-index: 1;
 }
 
 .avatar-wrapper {
@@ -500,6 +513,8 @@ function formatDate(dateStr) {
   display: flex;
   align-items: center;
   gap: var(--space-xl);
+  position: relative;
+  z-index: 1;
 }
 
 .stat-item {

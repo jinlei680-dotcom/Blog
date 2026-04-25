@@ -6,6 +6,7 @@
       <div class="orb orb-2"></div>
       <div class="orb orb-3"></div>
     </div>
+    <div class="cursor-glow" ref="cursorGlowEl" aria-hidden="true"></div>
 
     <header class="navbar" :class="{ 'navbar--scrolled': isScrolled }">
       <nav class="navbar-inner">
@@ -126,9 +127,15 @@ const { startPolling, stopPolling } = useNotification()
 const isScrolled = ref(false)
 const mobileMenuOpen = ref(false)
 const adminMenuOpen = ref(false)
+const cursorGlowEl = ref(null)
 
 function handleScroll() {
   isScrolled.value = window.scrollY > 20
+  const h = document.documentElement.scrollHeight - window.innerHeight
+  document.documentElement.style.setProperty(
+    '--nav-progress',
+    (h > 0 ? Math.min(100, window.scrollY / h * 100) : 0) + '%'
+  )
 }
 
 function handleLogout() {
@@ -139,6 +146,11 @@ function handleLogout() {
 
 onMounted(() => {
   window.addEventListener('scroll', handleScroll, { passive: true })
+  window.addEventListener('mousemove', (e) => {
+    if (!cursorGlowEl.value) return
+    cursorGlowEl.value.style.left = (e.clientX - 200) + 'px'
+    cursorGlowEl.value.style.top  = (e.clientY - 200) + 'px'
+  }, { passive: true })
   if (authStore.isLoggedIn) {
     startPolling()
   }
@@ -255,7 +267,9 @@ html { scroll-behavior: smooth; }
 
 body {
   font-family: var(--font-body);
-  background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E"),
+    linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
   background-attachment: fixed;
   min-height: 100vh;
   color: var(--color-text);
@@ -341,6 +355,21 @@ a { color: inherit; text-decoration: none; }
   80% { transform: translate(60px, 30px) scale(0.9); }
 }
 
+/* ===== Cursor glow ===== */
+.cursor-glow {
+  position: fixed;
+  width: 400px;
+  height: 400px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(139,92,246,0.07) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+  transition: left 0.08s linear, top 0.08s linear;
+  will-change: left, top;
+}
+
+@media (pointer: coarse) { .cursor-glow { display: none; } }
+
 /* ===== Navbar ===== */
 .navbar {
   position: fixed;
@@ -354,6 +383,17 @@ a { color: inherit; text-decoration: none; }
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
   transition: all var(--transition-smooth);
+}
+
+.navbar::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: var(--nav-progress, 0%);
+  height: 2px;
+  background: linear-gradient(90deg, var(--color-accent), var(--color-accent-cyan));
+  transition: width 0.1s linear;
 }
 
 .navbar--scrolled {
@@ -747,5 +787,14 @@ a { color: inherit; text-decoration: none; }
   .navbar-inner { padding: 0 var(--space-lg); }
   .brand-sub { display: none; }
   .footer-top { flex-direction: column; gap: var(--space-lg); }
+}
+
+/* ===== Accessibility: reduced motion ===== */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+  .cursor-glow { display: none; }
 }
 </style>

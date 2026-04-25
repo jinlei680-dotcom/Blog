@@ -1,4 +1,9 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
+import { fileURLToPath } from 'url'
+import { dirname, resolve } from 'path'
+
+const __dirname = dirname(fileURLToPath(import.meta.url))
+
 export default defineNuxtConfig({
   compatibilityDate: '2024-11-01',
   devtools: { enabled: true },
@@ -32,11 +37,23 @@ export default defineNuxtConfig({
       '/api/**': {
         proxy: 'http://localhost:8080/api/**'
       }
-    }
+    },
+    publicAssets: [
+      { dir: resolve(__dirname, 'public'), maxAge: 3600 }
+    ]
   },
 
   // Modules
   modules: [
     '@pinia/nuxt'
-  ]
+  ],
+
+  // Preload hero background image to reduce LCP
+  app: {
+    head: {
+      link: [
+        { rel: 'preload', as: 'image', href: '/images/hero-bg.jpg' }
+      ]
+    }
+  }
 })
