@@ -117,10 +117,6 @@ async function handleLogin() {
   align-items: center;
   justify-content: center;
   padding: var(--space-xl);
-  background:
-    radial-gradient(ellipse at 30% 20%, rgba(200, 149, 108, 0.06) 0%, transparent 50%),
-    radial-gradient(ellipse at 70% 80%, rgba(200, 149, 108, 0.04) 0%, transparent 50%),
-    linear-gradient(180deg, var(--color-bg) 0%, var(--color-bg-warm) 100%);
 }
 
 .auth-container {
@@ -151,7 +147,10 @@ async function handleLogin() {
   font-family: var(--font-display);
   font-size: 2.2rem;
   font-weight: 700;
-  color: var(--color-dark);
+  background: linear-gradient(135deg, #a78bfa, #06b6d4);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
   letter-spacing: -0.02em;
   margin-bottom: 0.3rem;
   animation: authEnter 0.6s ease-out 0.15s both;
@@ -166,11 +165,13 @@ async function handleLogin() {
 }
 
 .auth-form {
-  background: var(--color-surface);
+  background: var(--glass-bg);
   border-radius: var(--radius-lg);
   padding: var(--space-xl);
-  box-shadow: var(--shadow-md);
-  border: 1px solid var(--color-border-light);
+  box-shadow: var(--glass-shadow);
+  border: 1px solid var(--glass-border);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
   animation: authEnter 0.6s ease-out 0.25s both;
 }
 
@@ -194,8 +195,8 @@ async function handleLogin() {
   font-family: var(--font-body);
   font-size: 0.95rem;
   color: var(--color-text);
-  background: var(--color-bg);
-  border: 1.5px solid var(--color-border);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1.5px solid var(--glass-border);
   border-radius: var(--radius-sm);
   outline: none;
   transition: all var(--transition-fast);
@@ -208,19 +209,19 @@ async function handleLogin() {
 
 .form-input:focus {
   border-color: var(--color-accent);
-  background: var(--color-surface);
-  box-shadow: 0 0 0 3px var(--color-accent-light);
+  background: rgba(139, 92, 246, 0.08);
+  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.15);
 }
 
 .has-error .form-input {
-  border-color: #d4956c;
+  border-color: #f87171;
 }
 
 .form-error {
   display: block;
   font-family: var(--font-chinese);
   font-size: 0.8rem;
-  color: #c07a50;
+  color: #f87171;
   margin-top: var(--space-xs);
   letter-spacing: 0.01em;
 }
@@ -228,9 +229,9 @@ async function handleLogin() {
 .api-error {
   font-family: var(--font-chinese);
   font-size: 0.85rem;
-  color: #c07a50;
-  background: rgba(200, 149, 108, 0.08);
-  border: 1px solid rgba(200, 149, 108, 0.2);
+  color: #fca5a5;
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.2);
   border-radius: var(--radius-sm);
   padding: 0.6rem 1rem;
   margin-bottom: var(--space-lg);
@@ -254,14 +255,14 @@ async function handleLogin() {
 }
 
 .btn-primary {
-  background: var(--color-dark);
+  background: linear-gradient(135deg, var(--color-accent), var(--color-accent-cyan));
   color: white;
 }
 
 .btn-primary:hover:not(:disabled) {
-  background: var(--color-accent);
+  opacity: 0.9;
   transform: translateY(-2px);
-  box-shadow: 0 8px 30px rgba(200, 149, 108, 0.3);
+  box-shadow: 0 8px 30px rgba(139, 92, 246, 0.4);
 }
 
 .btn-primary:disabled {

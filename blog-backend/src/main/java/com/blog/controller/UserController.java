@@ -6,7 +6,10 @@ import com.blog.dto.UserProfileDTO;
 import com.blog.service.ArticleService;
 import com.blog.service.ProfileService;
 import org.springframework.data.domain.Page;
+import org.springframework.http.HttpStatus;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 @RestController
 @RequestMapping("/api/users")
@@ -33,5 +36,21 @@ public class UserController {
             @RequestParam(defaultValue = "10") int size) {
         Page<ArticleSummaryDTO> articles = articleService.listByUser(userId, page, size);
         return ApiResponse.success(articles);
+    }
+
+    @PutMapping("/{userId}/bio")
+    public ApiResponse<Void> updateBio(
+            @PathVariable Long userId,
+            @RequestBody java.util.Map<String, String> body) {
+        Long currentUserId = (Long) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if (!currentUserId.equals(userId)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "无权修改他人简介");
+        }
+        String bio = body.get("bio");
+        if (bio != null && bio.length() > 500) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "简介不能超过500字");
+        }
+        profileService.updateBio(userId, bio);
+        return ApiResponse.success(null);
     }
 }

@@ -23,8 +23,17 @@ export function useProfile() {
     return res.data
   }
 
+  async function updateBio(userId, bio) {
+    await $fetch(`/api/users/${userId}/bio`, {
+      method: 'PUT',
+      headers: authHeaders(),
+      body: { bio }
+    })
+  }
+
   return {
     fetchProfile,
-    fetchUserArticles
+    fetchUserArticles,
+    updateBio
   }
 }

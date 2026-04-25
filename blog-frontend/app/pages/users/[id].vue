@@ -66,9 +66,64 @@
           </div>
         </header>
 
+        <!-- Bio -->
+        <div class="profile-bio-section">
+          <template v-if="editingBio">
+            <textarea
+              v-model="bioInput"
+              class="bio-textarea"
+              placeholder="写点什么介绍自己..."
+              maxlength="500"
+              rows="3"
+            ></textarea>
+            <div class="bio-edit-actions">
+              <button class="bio-btn bio-btn--save" :disabled="bioSaving" @click="saveBio">
+                {{ bioSaving ? '保存中...' : '保存' }}
+              </button>
+              <button class="bio-btn bio-btn--cancel" @click="cancelBioEdit">取消</button>
+            </div>
+          </template>
+          <template v-else>
+            <p v-if="profile.bio" class="profile-bio">{{ profile.bio }}</p>
+            <p v-else-if="isOwnProfile" class="profile-bio profile-bio--empty">点击"编辑简介"，写点介绍自己的话...</p>
+            <button v-if="isOwnProfile" class="bio-edit-btn" @click="startBioEdit">✏ 编辑简介</button>
+          </template>
+        </div>
+
         <!-- Avatar uploading toast -->
         <div v-if="avatarUploading" class="upload-toast">上传中...</div>
         <div v-if="avatarError" class="upload-toast upload-toast--error">{{ avatarError }}</div>
+
+        <!-- Bookmarks Section (own profile only) -->
+        <section v-if="isOwnProfile && bookmarks.length > 0" class="profile-bookmarks">
+          <h2 class="section-title">
+            <span class="section-title-text">我的收藏</span>
+            <span class="section-title-sub">Saved</span>
+          </h2>
+          <div class="article-list">
+            <article
+              v-for="bm in bookmarks"
+              :key="bm.id"
+              class="article-card"
+            >
+              <NuxtLink :to="`/articles/${bm.id}`" class="article-card-link">
+                <div class="article-card-body">
+                  <h3 class="article-card-title">{{ bm.title }}</h3>
+                  <div class="article-card-meta">
+                    <span class="meta-date">收藏于 {{ formatRelativeTime(bm.savedAt) }}</span>
+                  </div>
+                </div>
+                <button
+                  class="remove-bookmark-btn"
+                  @click.prevent.stop="removeFromBookmarks(bm.id)"
+                  title="取消收藏"
+                >
+                  ✕
+                </button>
+              </NuxtLink>
+            </article>
+          </div>
+        </section>
 
         <!-- Articles Section -->
         <section class="profile-articles">
@@ -160,9 +215,11 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useAuthStore } from '~/stores/auth'
 import { useUpload } from '~/composables/useUpload'
+import { useBookmark } from '~/composables/useBookmark'
+import { useProfile } from '~/composables/useProfile'
 
 const route = useRoute()
 const authStore = useAuthStore()
@@ -211,6 +268,61 @@ const visiblePages = computed(() => {
 
 function goToPage(page) {
   navigateTo({ path: `/users/${userId}`, query: { page } })
+}
+
+// Bio editing
+const { updateBio } = useProfile()
+const editingBio = ref(false)
+const bioInput = ref('')
+const bioSaving = ref(false)
+
+function startBioEdit() {
+  bioInput.value = profile.value?.bio || ''
+  editingBio.value = true
+}
+
+function cancelBioEdit() {
+  editingBio.value = false
+}
+
+async function saveBio() {
+  bioSaving.value = true
+  try {
+    await updateBio(userId, bioInput.value.trim())
+    await refreshProfile()
+    editingBio.value = false
+  } catch (e) {
+    alert(e?.data?.message || '保存失败，请重试')
+  } finally {
+    bioSaving.value = false
+  }
+}
+
+// Bookmarks (own profile only, client-side)
+const { getBookmarks, removeBookmark } = useBookmark(authStore.user?.id)
+const bookmarks = ref([])
+
+onMounted(() => {
+  if (isOwnProfile.value) {
+    bookmarks.value = getBookmarks()
+  }
+})
+
+function removeFromBookmarks(articleId) {
+  removeBookmark(articleId)
+  bookmarks.value = getBookmarks()
+}
+
+function formatRelativeTime(isoStr) {
+  if (!isoStr) return ''
+  const d = new Date(isoStr)
+  if (isNaN(d.getTime())) return ''
+  const diffMin = Math.floor((Date.now() - d) / 60000)
+  if (diffMin < 1) return '刚刚'
+  if (diffMin < 60) return `${diffMin} 分钟前`
+  const diffH = Math.floor(diffMin / 60)
+  if (diffH < 24) return `${diffH} 小时前`
+  return `${d.getMonth() + 1}月${d.getDate()}日`
 }
 
 // Avatar upload
@@ -300,9 +412,12 @@ function formatDate(dateStr) {
 
 /* ===== Profile Header ===== */
 .profile-header {
-  background: var(--color-surface);
+  background: var(--glass-bg);
   border-radius: var(--radius-lg);
-  border: 1px solid var(--color-border-light);
+  border: 1px solid var(--glass-border);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  box-shadow: var(--glass-shadow);
   padding: var(--space-2xl);
   margin-bottom: var(--space-2xl);
   display: flex;
@@ -359,7 +474,10 @@ function formatDate(dateStr) {
   font-family: var(--font-display);
   font-size: 1.8rem;
   font-weight: 700;
-  color: var(--color-dark);
+  background: linear-gradient(135deg, #e2d9fa, #a5f3fc);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
   letter-spacing: -0.02em;
 }
 
@@ -393,7 +511,10 @@ function formatDate(dateStr) {
   font-family: var(--font-display);
   font-size: 2rem;
   font-weight: 700;
-  color: var(--color-dark);
+  background: linear-gradient(135deg, #a78bfa, #06b6d4);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
   line-height: 1.2;
 }
 
@@ -444,7 +565,7 @@ function formatDate(dateStr) {
   font-family: var(--font-chinese);
   font-size: 1.4rem;
   font-weight: 700;
-  color: var(--color-dark);
+  color: rgba(255, 255, 255, 0.9);
 }
 
 .section-title-sub {
@@ -482,9 +603,11 @@ function formatDate(dateStr) {
 .empty-state {
   text-align: center;
   padding: var(--space-3xl) var(--space-xl);
-  background: var(--color-surface);
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
   border-radius: var(--radius-lg);
-  border: 1.5px dashed var(--color-border);
+  border: 1.5px dashed var(--glass-border);
 }
 
 .empty-state--compact {
@@ -497,7 +620,7 @@ function formatDate(dateStr) {
   font-family: var(--font-chinese);
   font-size: 1.2rem;
   font-weight: 600;
-  color: var(--color-dark);
+  color: rgba(255, 255, 255, 0.85);
   margin-bottom: var(--space-sm);
 }
 
@@ -516,9 +639,11 @@ function formatDate(dateStr) {
 }
 
 .article-card {
-  background: var(--color-surface);
+  background: var(--glass-bg);
   border-radius: var(--radius-md);
-  border: 1px solid var(--color-border-light);
+  border: 1px solid var(--glass-border);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
   transition: all var(--transition-smooth);
   animation: cardEnter 0.5s ease-out both;
 }
@@ -529,8 +654,9 @@ function formatDate(dateStr) {
 }
 
 .article-card:hover {
-  border-color: var(--color-accent);
-  box-shadow: 0 12px 48px rgba(0,0,0,0.12);
+  background: var(--glass-bg-hover);
+  border-color: var(--glass-border-accent);
+  box-shadow: var(--glass-shadow), var(--shadow-glow);
   transform: translateY(-3px);
 }
 
@@ -553,16 +679,17 @@ function formatDate(dateStr) {
   font-family: var(--font-chinese);
   font-size: 1.15rem;
   font-weight: 600;
-  color: var(--color-dark);
+  color: rgba(255, 255, 255, 0.9);
   margin-bottom: 0.5rem;
   line-height: 1.5;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  transition: color var(--transition-fast);
 }
 
 .article-card:hover .article-card-title {
-  color: var(--color-accent);
+  color: #a78bfa;
 }
 
 .article-card-meta {
@@ -696,17 +823,138 @@ function formatDate(dateStr) {
 }
 
 .btn-primary {
-  background: var(--color-dark);
+  background: linear-gradient(135deg, var(--color-accent), var(--color-accent-cyan));
   color: white;
 }
 
 .btn-primary:hover {
-  background: var(--color-accent);
+  opacity: 0.9;
 }
 
 .btn-sm {
   padding: 0.6rem 1.5rem;
   font-size: 0.85rem;
+}
+
+/* ===== Bio Section ===== */
+.profile-bio-section {
+  padding: var(--space-lg) var(--space-2xl);
+  border-top: 1px solid var(--glass-border);
+}
+
+.profile-bio {
+  font-family: var(--font-chinese);
+  font-size: 0.92rem;
+  line-height: 1.8;
+  color: var(--color-text-secondary);
+  margin-bottom: var(--space-sm);
+  white-space: pre-wrap;
+}
+
+.profile-bio--empty {
+  color: var(--color-text-muted);
+  font-style: italic;
+}
+
+.bio-edit-btn {
+  background: transparent;
+  border: 1px solid var(--glass-border);
+  border-radius: 100px;
+  padding: 0.3rem 0.9rem;
+  font-family: var(--font-chinese);
+  font-size: 0.78rem;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  margin-top: var(--space-xs, 0.25rem);
+}
+
+.bio-edit-btn:hover {
+  border-color: var(--color-accent);
+  color: #a78bfa;
+}
+
+.bio-textarea {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1.5px solid var(--glass-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-md);
+  font-family: var(--font-chinese);
+  font-size: 0.92rem;
+  color: rgba(255, 255, 255, 0.9);
+  resize: vertical;
+  outline: none;
+  transition: border-color var(--transition-fast);
+  box-sizing: border-box;
+}
+
+.bio-textarea:focus {
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.15);
+}
+
+.bio-textarea::placeholder {
+  color: var(--color-text-muted);
+}
+
+.bio-edit-actions {
+  display: flex;
+  gap: var(--space-sm);
+  margin-top: var(--space-sm);
+}
+
+.bio-btn {
+  font-family: var(--font-chinese);
+  font-size: 0.82rem;
+  padding: 0.35rem 1rem;
+  border-radius: 100px;
+  border: none;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.bio-btn--save {
+  background: var(--color-accent);
+  color: white;
+}
+
+.bio-btn--save:hover { background: var(--color-accent-hover); }
+.bio-btn--save:disabled { opacity: 0.6; cursor: not-allowed; }
+
+.bio-btn--cancel {
+  background: var(--glass-bg);
+  border: 1.5px solid var(--glass-border);
+  color: var(--color-text-secondary);
+}
+
+.bio-btn--cancel:hover { border-color: var(--color-text-secondary); }
+
+/* ===== Bookmarks Section ===== */
+.profile-bookmarks {
+  margin-bottom: var(--space-2xl);
+}
+
+.remove-bookmark-btn {
+  flex-shrink: 0;
+  background: transparent;
+  border: 1.5px solid var(--color-border);
+  border-radius: 50%;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.7rem;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.remove-bookmark-btn:hover {
+  border-color: #f87171;
+  color: #f87171;
+  background: rgba(248, 113, 113, 0.1);
 }
 
 /* ===== Responsive ===== */

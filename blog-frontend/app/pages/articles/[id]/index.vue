@@ -32,6 +32,8 @@
               <span class="meta-divider">·</span>
               <span class="meta-updated">编辑于 {{ formatDate(article.updatedAt) }}</span>
             </template>
+            <span class="meta-divider">·</span>
+            <span class="meta-reading-time">⏱ 约 {{ readingMinutes }} 分钟阅读</span>
           </div>
           <!-- Author / Admin Actions -->
           <div v-if="article.tags && article.tags.length" class="article-tags">
@@ -75,8 +77,8 @@
                   viewBox="0 0 24 24"
                   width="22"
                   height="22"
-                  :fill="liked ? '#c8956c' : 'none'"
-                  :stroke="liked ? '#c8956c' : 'currentColor'"
+                  :fill="liked ? '#a78bfa' : 'none'"
+                  :stroke="liked ? '#a78bfa' : 'currentColor'"
                   stroke-width="2"
                   stroke-linecap="round"
                   stroke-linejoin="round"
@@ -87,10 +89,43 @@
               <span class="like-count-num">{{ likeCount }}</span>
               <span class="like-label">喜欢</span>
             </button>
+
+            <!-- Bookmark button -->
+            <button
+              class="action-btn bookmark-btn"
+              :class="{ 'action-btn--active': isBookmarkedState }"
+              @click="handleBookmark"
+              :aria-label="isBookmarkedState ? '取消收藏' : '收藏'"
+            >
+              <svg viewBox="0 0 24 24" width="18" height="18"
+                :fill="isBookmarkedState ? '#a78bfa' : 'none'"
+                :stroke="isBookmarkedState ? '#a78bfa' : 'currentColor'"
+                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
+              </svg>
+              <span>{{ isBookmarkedState ? '已收藏' : '收藏' }}</span>
+            </button>
+
+            <!-- Share button -->
+            <button class="action-btn share-btn" @click="handleShare">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/>
+                <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
+              </svg>
+              <span>分享</span>
+            </button>
+
             <span class="meta-divider">·</span>
             <span class="comment-count">💬 {{ commentCount }} 条评论</span>
           </div>
         </footer>
+
+        <!-- Share toast -->
+        <Teleport to="body">
+          <Transition name="toast">
+            <div v-if="showShareToast" class="share-toast">🔗 链接已复制到剪贴板</div>
+          </Transition>
+        </Teleport>
 
         <!-- Comment Section -->
         <section class="comment-section">
@@ -149,6 +184,8 @@ import { useAuthStore } from '~/stores/auth'
 import { useArticle } from '~/composables/useArticle'
 import { useComment } from '~/composables/useComment'
 import { useLike } from '~/composables/useLike'
+import { useBookmark } from '~/composables/useBookmark'
+import { estimateReadingTime } from '~/utils/readingTime'
 
 const route = useRoute()
 const authStore = useAuthStore()
@@ -170,6 +207,49 @@ const isAuthor = computed(() => {
 const canEditOrDelete = computed(() => {
   return isAuthor.value || authStore.isAdmin
 })
+
+// Reading time
+const readingMinutes = computed(() => {
+  return article.value ? estimateReadingTime(article.value.content) : 1
+})
+
+// Bookmark
+const { toggleBookmark, syncState } = useBookmark(authStore.user?.id)
+const isBookmarkedState = ref(false)
+
+watch(() => article.value, (val) => {
+  if (val) {
+    isBookmarkedState.value = syncState(val.id).value
+  }
+}, { immediate: true })
+
+function handleBookmark() {
+  if (!article.value) return
+  isBookmarkedState.value = toggleBookmark(article.value.id, article.value.title)
+}
+
+// Share
+const showShareToast = ref(false)
+let shareToastTimer = null
+
+async function handleShare() {
+  const url = window.location.href
+  try {
+    await navigator.clipboard.writeText(url)
+  } catch {
+    const el = document.createElement('textarea')
+    el.value = url
+    el.style.position = 'fixed'
+    el.style.opacity = '0'
+    document.body.appendChild(el)
+    el.select()
+    document.execCommand('copy')
+    document.body.removeChild(el)
+  }
+  showShareToast.value = true
+  clearTimeout(shareToastTimer)
+  shareToastTimer = setTimeout(() => { showShareToast.value = false }, 3000)
+}
 
 // Like state
 const liked = ref(false)
@@ -330,7 +410,7 @@ function formatDate(dateStr) {
 
 .detail-error h2 {
   font-size: 1.3rem;
-  color: var(--color-dark);
+  color: rgba(255, 255, 255, 0.9);
   margin-bottom: var(--space-sm);
 }
 
@@ -374,7 +454,10 @@ function formatDate(dateStr) {
   font-family: var(--font-chinese);
   font-size: clamp(1.8rem, 4vw, 2.6rem);
   font-weight: 700;
-  color: var(--color-dark);
+  background: linear-gradient(135deg, rgba(255,255,255,0.95), #a78bfa);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
   line-height: 1.4;
   margin-bottom: var(--space-lg);
   letter-spacing: -0.01em;
@@ -399,6 +482,7 @@ function formatDate(dateStr) {
 .meta-author-link:hover { color: var(--color-accent); }
 .meta-updated { font-style: italic; }
 .meta-divider { color: var(--color-border); }
+.meta-reading-time { color: var(--color-text-muted); }
 
 /* ===== Article Tags ===== */
 .article-tags {
@@ -415,18 +499,21 @@ function formatDate(dateStr) {
   font-family: var(--font-chinese);
   font-size: 0.8rem;
   font-weight: 500;
-  color: var(--color-accent);
-  background: var(--color-accent-light);
+  color: #a78bfa;
+  background: rgba(139, 92, 246, 0.15);
+  border: 1px solid rgba(139, 92, 246, 0.3);
   border-radius: 100px;
   text-decoration: none;
   transition: all var(--transition-fast);
+  backdrop-filter: blur(8px);
 }
 
 .article-tag-pill:hover {
   background: var(--color-accent);
   color: white;
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(200, 149, 108, 0.25);
+  box-shadow: 0 4px 16px rgba(139, 92, 246, 0.35);
+  border-color: transparent;
 }
 
 /* ===== Author Actions ===== */
@@ -462,14 +549,16 @@ function formatDate(dateStr) {
 }
 
 .btn-edit {
-  background: var(--color-accent-light);
-  color: var(--color-accent);
-  border: 1.5px solid var(--color-accent);
+  background: rgba(139, 92, 246, 0.15);
+  color: #a78bfa;
+  border: 1.5px solid rgba(139, 92, 246, 0.4);
+  backdrop-filter: blur(8px);
 }
 
 .btn-edit:hover {
   background: var(--color-accent);
   color: white;
+  border-color: transparent;
 }
 
 .btn-delete {
@@ -527,19 +616,19 @@ function formatDate(dateStr) {
 }
 
 .like-btn:hover {
-  border-color: #c8956c;
-  color: #c8956c;
-  background: rgba(200, 149, 108, 0.06);
+  border-color: #a78bfa;
+  color: #a78bfa;
+  background: rgba(139, 92, 246, 0.1);
 }
 
 .like-btn--liked {
-  border-color: #c8956c;
-  color: #c8956c;
-  background: rgba(200, 149, 108, 0.08);
+  border-color: #a78bfa;
+  color: #a78bfa;
+  background: rgba(139, 92, 246, 0.12);
 }
 
 .like-btn--liked:hover {
-  background: rgba(200, 149, 108, 0.14);
+  background: rgba(139, 92, 246, 0.2);
 }
 
 .like-btn:disabled {
@@ -599,7 +688,7 @@ function formatDate(dateStr) {
   font-family: var(--font-chinese);
   font-size: 1.2rem;
   font-weight: 600;
-  color: var(--color-dark);
+  color: rgba(255, 255, 255, 0.9);
   margin-bottom: var(--space-lg);
 }
 
@@ -650,19 +739,22 @@ function formatDate(dateStr) {
 }
 
 .modal-content {
-  background: var(--color-surface);
+  background: rgba(15, 12, 41, 0.92);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid var(--glass-border);
   border-radius: var(--radius-lg);
   padding: var(--space-xl) var(--space-2xl);
   max-width: 420px;
   width: 100%;
-  box-shadow: var(--shadow-lg);
+  box-shadow: var(--glass-shadow), var(--shadow-glow);
 }
 
 .modal-title {
   font-family: var(--font-chinese);
   font-size: 1.2rem;
   font-weight: 600;
-  color: var(--color-dark);
+  color: rgba(255, 255, 255, 0.9);
   margin-bottom: var(--space-sm);
 }
 
@@ -710,6 +802,60 @@ function formatDate(dateStr) {
 
 .btn-danger:hover { background: #c33; }
 .btn-danger:disabled { opacity: 0.6; cursor: not-allowed; }
+
+/* ===== Action Buttons (Bookmark / Share) ===== */
+.action-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: var(--glass-bg);
+  border: 1.5px solid var(--glass-border);
+  backdrop-filter: blur(8px);
+  border-radius: 100px;
+  padding: 0.5rem 1.1rem;
+  cursor: pointer;
+  font-family: var(--font-chinese);
+  font-size: 0.85rem;
+  color: var(--color-text-secondary);
+  transition: all var(--transition-fast);
+  user-select: none;
+}
+
+.action-btn:hover {
+  border-color: rgba(139, 92, 246, 0.5);
+  color: #a78bfa;
+  background: rgba(139, 92, 246, 0.1);
+}
+
+.action-btn--active {
+  border-color: rgba(139, 92, 246, 0.6);
+  color: #a78bfa;
+  background: rgba(139, 92, 246, 0.15);
+}
+
+/* ===== Share Toast ===== */
+.share-toast {
+  position: fixed;
+  bottom: 2rem;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(15, 12, 41, 0.92);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(139, 92, 246, 0.4);
+  border-radius: 100px;
+  padding: 0.65rem 1.5rem;
+  font-family: var(--font-chinese);
+  font-size: 0.88rem;
+  color: #a78bfa;
+  z-index: 300;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), 0 0 20px rgba(139, 92, 246, 0.2);
+  white-space: nowrap;
+}
+
+.toast-enter-active { transition: all 0.3s ease-out; }
+.toast-leave-active { transition: all 0.25s ease-in; }
+.toast-enter-from, .toast-leave-to { opacity: 0; transform: translateX(-50%) translateY(12px); }
 
 /* Modal transitions */
 .modal-enter-active { transition: all 0.25s ease-out; }

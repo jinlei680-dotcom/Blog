@@ -16,6 +16,7 @@ public class UserProfileDTO {
     private Long id;
     private String username;
     private String avatarUrl;
+    private String bio;
     private LocalDateTime createdAt;
     private long articleCount;
     private long totalLikes;

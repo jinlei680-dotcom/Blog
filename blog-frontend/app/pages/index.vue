@@ -185,10 +185,7 @@ function formatDate(dateStr) {
 .hero-bg {
   position: absolute;
   inset: 0;
-  background:
-    radial-gradient(ellipse at 20% 50%, rgba(200, 149, 108, 0.08) 0%, transparent 50%),
-    radial-gradient(ellipse at 80% 20%, rgba(200, 149, 108, 0.05) 0%, transparent 40%),
-    linear-gradient(180deg, var(--color-bg) 0%, var(--color-bg-warm) 100%);
+  background: transparent;
 }
 
 .hero-gradient {
@@ -198,7 +195,7 @@ function formatDate(dateStr) {
   width: 600px;
   height: 600px;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(200, 149, 108, 0.06) 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(139, 92, 246, 0.08) 0%, transparent 70%);
   animation: floatSlow 20s ease-in-out infinite;
 }
 
@@ -248,8 +245,11 @@ function formatDate(dateStr) {
 .hero-title-italic {
   font-family: var(--font-display);
   font-style: italic;
-  font-weight: 600;
-  color: var(--color-accent);
+  font-weight: 700;
+  background: linear-gradient(135deg, #a78bfa, #06b6d4);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
   font-size: clamp(1.5rem, 3.5vw, 2.4rem);
   margin-top: 0.2rem;
 }
@@ -290,25 +290,27 @@ function formatDate(dateStr) {
 }
 
 .btn-primary {
-  background: var(--color-dark);
+  background: linear-gradient(135deg, var(--color-accent), var(--color-accent-cyan));
   color: white;
 }
 
 .btn-primary:hover {
-  background: var(--color-accent);
+  opacity: 0.9;
   transform: translateY(-2px);
-  box-shadow: 0 8px 30px rgba(200, 149, 108, 0.3);
+  box-shadow: 0 8px 30px rgba(139, 92, 246, 0.4);
 }
 
 .btn-ghost {
-  background: transparent;
+  background: var(--glass-bg);
   color: var(--color-text-secondary);
-  border: 1.5px solid var(--color-border);
+  border: 1.5px solid var(--glass-border);
+  backdrop-filter: blur(8px);
 }
 
 .btn-ghost:hover {
   border-color: var(--color-accent);
   color: var(--color-accent);
+  background: var(--color-accent-light);
   transform: translateY(-2px);
 }
 
@@ -318,7 +320,7 @@ function formatDate(dateStr) {
 }
 
 .btn-write {
-  background: var(--color-accent);
+  background: linear-gradient(135deg, var(--color-accent), var(--color-accent-cyan));
   color: white;
   padding: 0.6rem 1.5rem;
   font-size: 0.85rem;
@@ -326,9 +328,9 @@ function formatDate(dateStr) {
 }
 
 .btn-write:hover {
-  background: var(--color-accent-hover);
+  opacity: 0.9;
   transform: translateY(-1px);
-  box-shadow: 0 4px 16px rgba(200, 149, 108, 0.3);
+  box-shadow: 0 4px 20px rgba(139, 92, 246, 0.4);
 }
 
 .btn-write-icon {
@@ -361,7 +363,10 @@ function formatDate(dateStr) {
   font-family: var(--font-chinese);
   font-size: 1.8rem;
   font-weight: 700;
-  color: var(--color-dark);
+  background: linear-gradient(135deg, #e2d9fa, #a5f3fc);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
   margin-bottom: 0.2rem;
 }
 
@@ -399,9 +404,11 @@ function formatDate(dateStr) {
 .empty-state {
   text-align: center;
   padding: var(--space-3xl) var(--space-xl);
-  background: var(--color-surface);
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
   border-radius: var(--radius-lg);
-  border: 1.5px dashed var(--color-border);
+  border: 1.5px dashed var(--glass-border);
 }
 
 .empty-icon { font-size: 3rem; margin-bottom: var(--space-md); }
@@ -410,7 +417,7 @@ function formatDate(dateStr) {
   font-family: var(--font-chinese);
   font-size: 1.2rem;
   font-weight: 600;
-  color: var(--color-dark);
+  color: rgba(255, 255, 255, 0.85);
   margin-bottom: var(--space-sm);
 }
 
@@ -429,9 +436,11 @@ function formatDate(dateStr) {
 }
 
 .article-card {
-  background: var(--color-surface);
+  background: var(--glass-bg);
   border-radius: var(--radius-md);
-  border: 1px solid var(--color-border-light);
+  border: 1px solid var(--glass-border);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
   transition: all var(--transition-smooth);
   animation: cardEnter 0.5s ease-out both;
 }
@@ -442,8 +451,9 @@ function formatDate(dateStr) {
 }
 
 .article-card:hover {
-  border-color: var(--color-accent);
-  box-shadow: var(--shadow-hover);
+  background: var(--glass-bg-hover);
+  border-color: var(--glass-border-accent);
+  box-shadow: var(--glass-shadow), var(--shadow-glow);
   transform: translateY(-3px);
 }
 
@@ -466,16 +476,17 @@ function formatDate(dateStr) {
   font-family: var(--font-chinese);
   font-size: 1.15rem;
   font-weight: 600;
-  color: var(--color-dark);
+  color: rgba(255, 255, 255, 0.9);
   margin-bottom: 0.5rem;
   line-height: 1.5;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  transition: color var(--transition-fast);
 }
 
 .article-card:hover .article-card-title {
-  color: var(--color-accent);
+  color: #a78bfa;
 }
 
 .article-card-meta {
@@ -533,8 +544,9 @@ function formatDate(dateStr) {
   font-size: 0.85rem;
   padding: 0.5rem 1.2rem;
   border-radius: 100px;
-  border: 1.5px solid var(--color-border);
-  background: var(--color-surface);
+  border: 1.5px solid var(--glass-border);
+  background: var(--glass-bg);
+  backdrop-filter: blur(8px);
   color: var(--color-text-secondary);
   cursor: pointer;
   transition: all var(--transition-fast);
@@ -560,8 +572,9 @@ function formatDate(dateStr) {
   width: 36px;
   height: 36px;
   border-radius: 100px;
-  border: 1.5px solid var(--color-border);
-  background: var(--color-surface);
+  border: 1.5px solid var(--glass-border);
+  background: var(--glass-bg);
+  backdrop-filter: blur(8px);
   color: var(--color-text-secondary);
   font-family: var(--font-body);
   font-size: 0.85rem;

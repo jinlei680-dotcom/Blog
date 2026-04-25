@@ -4,7 +4,7 @@
       <MdEditor
         v-model="content"
         :placeholder="placeholder"
-        :theme="'light'"
+        :theme="'dark'"
         :language="'en-US'"
         :style="{ height: '500px' }"
         :toolbars="toolbarItems"
@@ -86,13 +86,13 @@ async function handleUploadImg(files, callback) {
 .md-editor-wrapper {
   border-radius: var(--radius-md);
   overflow: hidden;
-  border: 1.5px solid var(--color-border);
+  border: 1.5px solid var(--glass-border);
   transition: border-color var(--transition-fast);
 }
 
 .md-editor-wrapper:focus-within {
   border-color: var(--color-accent);
-  box-shadow: 0 0 0 3px var(--color-accent-light);
+  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.15);
 }
 
 .md-editor-fallback {
@@ -126,66 +126,57 @@ async function handleUploadImg(files, callback) {
 </style>
 
 <style>
-/* Global overrides for md-editor-v3 to match blog warm theme */
-.md-editor {
-  --md-bk-color: #ffffff !important;
-  --md-border-color: var(--color-border) !important;
-  --md-color: var(--color-text) !important;
+/* Global overrides for md-editor-v3 dark theme */
+.md-editor-dark {
+  --md-bk-color: rgba(20, 16, 50, 0.95) !important;
+  --md-border-color: rgba(255, 255, 255, 0.12) !important;
+  --md-color: rgba(255, 255, 255, 0.9) !important;
   font-family: var(--font-chinese) !important;
 }
 
-.md-editor .md-editor-toolbar-wrapper {
-  background: var(--color-bg-warm) !important;
-  border-bottom: 1px solid var(--color-border-light) !important;
+.md-editor-dark .md-editor-toolbar-wrapper {
+  background: rgba(10, 8, 30, 0.8) !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
 }
 
-.md-editor .md-editor-toolbar .md-editor-toolbar-item {
-  color: var(--color-text-secondary) !important;
+.md-editor-dark .md-editor-toolbar .md-editor-toolbar-item {
+  color: rgba(255, 255, 255, 0.6) !important;
 }
 
-.md-editor .md-editor-toolbar .md-editor-toolbar-item:hover {
-  color: var(--color-accent) !important;
+.md-editor-dark .md-editor-toolbar .md-editor-toolbar-item:hover {
+  color: #a78bfa !important;
+  background: rgba(139, 92, 246, 0.1) !important;
 }
 
-.md-editor .md-editor-input-wrapper {
+.md-editor-dark .md-editor-input-wrapper {
   font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace !important;
 }
 
-.md-editor .md-editor-preview {
+.md-editor-dark .md-editor-preview {
   font-family: var(--font-chinese) !important;
-  color: var(--color-text) !important;
+  color: rgba(255, 255, 255, 0.85) !important;
   line-height: 2 !important;
 }
 
-.md-editor .md-editor-preview h1,
-.md-editor .md-editor-preview h2,
-.md-editor .md-editor-preview h3,
-.md-editor .md-editor-preview h4,
-.md-editor .md-editor-preview h5,
-.md-editor .md-editor-preview h6 {
-  color: var(--color-dark) !important;
-  font-family: var(--font-chinese) !important;
+.md-editor-dark .md-editor-preview h1,
+.md-editor-dark .md-editor-preview h2,
+.md-editor-dark .md-editor-preview h3 {
+  color: #e2d9fa !important;
 }
 
-.md-editor .md-editor-preview a {
-  color: var(--color-accent) !important;
+.md-editor-dark .md-editor-preview a {
+  color: #a78bfa !important;
 }
 
-.md-editor .md-editor-preview blockquote {
-  border-left-color: var(--color-accent) !important;
-  background: var(--color-accent-light) !important;
+.md-editor-dark .md-editor-preview blockquote {
+  border-left-color: #8b5cf6 !important;
+  background: rgba(139, 92, 246, 0.08) !important;
 }
 
-.md-editor .md-editor-preview code {
-  background: var(--color-bg-warm) !important;
-  color: var(--color-accent-hover) !important;
+.md-editor-dark .md-editor-preview code {
+  background: rgba(139, 92, 246, 0.12) !important;
+  color: #c4b5fd !important;
   border-radius: 4px !important;
   padding: 0.15em 0.4em !important;
-}
-
-.md-editor .md-editor-preview pre code {
-  background: transparent !important;
-  color: inherit !important;
-  padding: 0 !important;
 }
 </style>

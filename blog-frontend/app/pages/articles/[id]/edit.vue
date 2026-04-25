@@ -20,6 +20,17 @@
         <h1 class="editor-title">编辑文章</h1>
         <p class="editor-subtitle">Edit your story</p>
 
+        <!-- Draft restore banner -->
+        <Transition name="banner-slide">
+          <div v-if="showDraftBanner" class="draft-banner">
+            <span class="draft-banner-text">发现草稿（{{ draftData ? formatDraftTime(draftData.savedAt) : '' }}），是否恢复？</span>
+            <div class="draft-banner-actions">
+              <button class="draft-btn draft-btn--restore" @click="restoreDraft">恢复</button>
+              <button class="draft-btn draft-btn--discard" @click="discardDraft">忽略</button>
+            </div>
+          </div>
+        </Transition>
+
         <form class="editor-form" @submit.prevent="handleSubmit">
           <div class="form-group">
             <label class="form-label" for="title">标题</label>
@@ -38,6 +49,16 @@
             <label class="form-label">正文</label>
             <MarkdownEditor v-model="form.content" placeholder="文章内容..." />
             <span v-if="errors.content" class="form-error">{{ errors.content }}</span>
+            <!-- Writing stats -->
+            <div class="writing-stats">
+              <span class="stat-item">📝 {{ wordCount }} 字</span>
+              <span class="stat-sep">·</span>
+              <span class="stat-item">¶ {{ paragraphCount }} 段</span>
+              <span class="stat-sep">·</span>
+              <span class="stat-item">⏱ 约 {{ readingTime }} 分钟阅读</span>
+              <span class="stat-sep" v-if="lastSavedAt">·</span>
+              <span class="stat-item stat-saved" v-if="lastSavedAt">已自动保存</span>
+            </div>
           </div>
 
           <div class="form-group">
@@ -57,8 +78,10 @@
 </template>
 
 <script setup>
-import { ref, reactive } from 'vue'
+import { ref, reactive, computed, onMounted, onUnmounted } from 'vue'
 import { useArticle } from '~/composables/useArticle'
+import { useDraft } from '~/composables/useDraft'
+import { estimateReadingTime, countWords, countParagraphs } from '~/utils/readingTime'
 
 definePageMeta({ middleware: 'auth' })
 
@@ -78,6 +101,55 @@ const form = reactive({
 })
 const errors = reactive({ title: '', content: '' })
 const submitting = ref(false)
+
+// Draft
+const draftKey = `draft_article_edit_${articleId}`
+const { saveDraft, loadDraft, clearDraft, hasDraft, formatDraftTime } = useDraft(draftKey)
+
+const draftData = ref(null)
+const showDraftBanner = ref(false)
+const lastSavedAt = ref(null)
+
+onMounted(() => {
+  const d = loadDraft()
+  if (d && (d.title || d.content)) {
+    draftData.value = d
+    showDraftBanner.value = true
+  }
+})
+
+function restoreDraft() {
+  const d = loadDraft()
+  if (d) {
+    form.title = d.title || form.title
+    form.content = d.content || form.content
+    form.tagIds = d.tagIds || form.tagIds
+  }
+  showDraftBanner.value = false
+}
+
+function discardDraft() {
+  clearDraft()
+  showDraftBanner.value = false
+}
+
+let draftTimer = null
+onMounted(() => {
+  draftTimer = setInterval(() => {
+    if (form.title || form.content) {
+      saveDraft(form.title, form.content, form.tagIds)
+      lastSavedAt.value = new Date()
+    }
+  }, 30000)
+})
+onUnmounted(() => {
+  clearInterval(draftTimer)
+})
+
+// Writing stats
+const wordCount = computed(() => countWords(form.content))
+const paragraphCount = computed(() => countParagraphs(form.content))
+const readingTime = computed(() => estimateReadingTime(form.content))
 
 function validate() {
   errors.title = ''
@@ -99,6 +171,7 @@ async function handleSubmit() {
   submitting.value = true
   try {
     await updateArticle(articleId, form.title.trim(), form.content.trim(), form.tagIds)
+    clearDraft()
     navigateTo(`/articles/${articleId}`)
   } catch (err) {
     const msg = err.data?.message || '保存失败，请重试'
@@ -136,7 +209,7 @@ async function handleSubmit() {
   transition: color var(--transition-fast);
 }
 
-.back-link:hover { color: var(--color-accent); }
+.back-link:hover { color: #a78bfa; }
 
 .loading-state,
 .error-state {
@@ -162,7 +235,10 @@ async function handleSubmit() {
   font-family: var(--font-chinese);
   font-size: 2rem;
   font-weight: 700;
-  color: var(--color-dark);
+  background: linear-gradient(135deg, #a78bfa, #06b6d4);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
   margin-bottom: 0.2rem;
 }
 
@@ -174,6 +250,60 @@ async function handleSubmit() {
   letter-spacing: 0.05em;
   margin-bottom: var(--space-2xl);
 }
+
+/* Draft Banner */
+.draft-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-md);
+  padding: 0.75rem 1.2rem;
+  margin-bottom: var(--space-lg);
+  background: rgba(6, 182, 212, 0.1);
+  border: 1px solid rgba(6, 182, 212, 0.3);
+  border-radius: var(--radius-md);
+  backdrop-filter: blur(8px);
+}
+
+.draft-banner-text {
+  font-family: var(--font-chinese);
+  font-size: 0.88rem;
+  color: #67e8f9;
+}
+
+.draft-banner-actions {
+  display: flex;
+  gap: var(--space-sm);
+  flex-shrink: 0;
+}
+
+.draft-btn {
+  font-family: var(--font-chinese);
+  font-size: 0.82rem;
+  padding: 0.3rem 0.9rem;
+  border-radius: 100px;
+  border: none;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.draft-btn--restore {
+  background: rgba(6, 182, 212, 0.2);
+  color: #67e8f9;
+  border: 1px solid rgba(6, 182, 212, 0.4);
+}
+
+.draft-btn--restore:hover { background: rgba(6, 182, 212, 0.35); }
+
+.draft-btn--discard {
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--color-text-muted);
+  border: 1px solid var(--glass-border);
+}
+
+.banner-slide-enter-active { transition: all 0.3s ease-out; }
+.banner-slide-leave-active { transition: all 0.2s ease-in; }
+.banner-slide-enter-from, .banner-slide-leave-to { opacity: 0; transform: translateY(-8px); }
 
 .editor-form {
   display: flex;
@@ -199,17 +329,19 @@ async function handleSubmit() {
   font-size: 1.1rem;
   font-weight: 600;
   padding: var(--space-md) var(--space-lg);
-  border: 1.5px solid var(--color-border);
+  border: 1.5px solid var(--glass-border);
   border-radius: var(--radius-md);
-  background: var(--color-surface);
-  color: var(--color-dark);
+  background: var(--glass-bg);
+  backdrop-filter: blur(8px);
+  color: rgba(255, 255, 255, 0.9);
   transition: all var(--transition-fast);
   outline: none;
 }
 
 .form-input:focus {
   border-color: var(--color-accent);
-  box-shadow: 0 0 0 3px var(--color-accent-light);
+  background: rgba(139, 92, 246, 0.08);
+  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.15);
 }
 
 .form-input::placeholder { color: var(--color-text-muted); font-weight: 400; }
@@ -217,8 +349,26 @@ async function handleSubmit() {
 .form-error {
   font-family: var(--font-chinese);
   font-size: 0.82rem;
-  color: #d44;
+  color: #f87171;
 }
+
+/* Writing stats */
+.writing-stats {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.6rem;
+  padding: 0 0.2rem;
+}
+
+.stat-item {
+  font-family: var(--font-chinese);
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+}
+
+.stat-saved { color: #6ee7b7; }
+.stat-sep { color: var(--color-border); font-size: 0.75rem; }
 
 .form-actions {
   display: flex;
@@ -244,32 +394,36 @@ async function handleSubmit() {
 }
 
 .btn-primary {
-  background: var(--color-dark);
+  background: linear-gradient(135deg, var(--color-accent), var(--color-accent-cyan));
   color: white;
 }
 
 .btn-primary:hover {
-  background: var(--color-accent);
+  opacity: 0.9;
   transform: translateY(-1px);
-  box-shadow: 0 6px 24px rgba(200, 149, 108, 0.3);
+  box-shadow: 0 6px 24px rgba(139, 92, 246, 0.4);
 }
 
 .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
 
 .btn-ghost {
-  background: transparent;
+  background: var(--glass-bg);
+  backdrop-filter: blur(8px);
   color: var(--color-text-secondary);
-  border: 1.5px solid var(--color-border);
+  border: 1.5px solid var(--glass-border);
 }
 
 .btn-ghost:hover {
   border-color: var(--color-accent);
-  color: var(--color-accent);
+  color: #a78bfa;
+  background: var(--color-accent-light);
 }
 
 @media (max-width: 768px) {
   .editor-container { padding: 0 var(--space-lg); }
   .form-actions { flex-direction: column-reverse; }
   .form-actions .btn { width: 100%; }
+  .draft-banner { flex-direction: column; align-items: flex-start; }
+  .writing-stats { flex-wrap: wrap; }
 }
 </style>

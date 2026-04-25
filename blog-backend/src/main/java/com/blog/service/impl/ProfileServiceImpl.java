@@ -39,9 +39,19 @@ public class ProfileServiceImpl implements ProfileService {
                 .id(user.getId())
                 .username(user.getUsername())
                 .avatarUrl(user.getAvatarUrl())
+                .bio(user.getBio())
                 .createdAt(user.getCreatedAt())
                 .articleCount(articleCount)
                 .totalLikes(totalLikes)
                 .build();
+    }
+
+    @Override
+    @Transactional
+    public void updateBio(Long userId, String bio) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("用户不存在"));
+        user.setBio(bio != null ? bio.strip() : null);
+        userRepository.save(user);
     }
 }

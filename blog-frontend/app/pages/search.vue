@@ -289,9 +289,11 @@ useHead({
 }
 
 .article-card {
-  background: var(--color-surface);
+  background: var(--glass-bg);
   border-radius: var(--radius-md);
-  border: 1px solid var(--color-border-light);
+  border: 1px solid var(--glass-border);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
   transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
   animation: cardEnter 0.5s ease-out both;
 }
@@ -302,8 +304,9 @@ useHead({
 }
 
 .article-card:hover {
-  border-color: var(--color-accent);
-  box-shadow: var(--shadow-hover);
+  background: var(--glass-bg-hover);
+  border-color: var(--glass-border-accent);
+  box-shadow: var(--glass-shadow), var(--shadow-glow);
   transform: translateY(-3px);
 }
 
@@ -326,16 +329,17 @@ useHead({
   font-family: var(--font-chinese);
   font-size: 1.15rem;
   font-weight: 600;
-  color: var(--color-dark);
+  color: rgba(255, 255, 255, 0.9);
   margin-bottom: 0.5rem;
   line-height: 1.5;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  transition: color var(--transition-fast);
 }
 
 .article-card:hover .article-card-title {
-  color: var(--color-accent);
+  color: #a78bfa;
 }
 
 .article-card-meta {
