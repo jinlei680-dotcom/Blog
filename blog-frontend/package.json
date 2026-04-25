@@ -1,0 +1,30 @@
+{
+  "name": "blog-frontend",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "build": "nuxt build",
+    "dev": "nuxt dev",
+    "generate": "nuxt generate",
+    "preview": "nuxt preview",
+    "postinstall": "nuxt prepare",
+    "test": "vitest --run"
+  },
+  "dependencies": {
+    "@pinia/nuxt": "^0.10.1",
+    "dompurify": "^3.3.3",
+    "md-editor-v3": "^6.4.2",
+    "nuxt": "^3.17.5",
+    "pinia": "^3.0.2",
+    "vue": "^3.5.31",
+    "vue-router": "^4.5.1"
+  },
+  "devDependencies": {
+    "@nuxt/test-utils": "^3.18.0",
+    "@vitejs/plugin-vue": "^6.0.5",
+    "@vue/test-utils": "^2.4.6",
+    "fast-check": "^4.1.1",
+    "jsdom": "^29.0.2",
+    "vitest": "^3.2.3"
+  }
+}

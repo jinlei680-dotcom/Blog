@@ -1,0 +1,30 @@
+# Frontend
+blog-frontend/node_modules/
+blog-frontend/.nuxt/
+blog-frontend/.output/
+blog-frontend/dist/
+
+# Backend
+blog-backend/target/
+blog-backend/uploads/
+*.jar
+*.war
+
+# IDE
+.idea/
+*.iml
+.vscode/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Env / secrets
+*.env
+.env.*
+blog-backend/src/main/resources/application-local.yml
+
+# Local dev tool configs
+.claude/
+.kiro/

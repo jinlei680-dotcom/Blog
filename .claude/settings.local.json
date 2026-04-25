@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(brew install *)",
+      "Bash(sshpass *)",
+      "Bash(mvn spring-boot:run)",
+      "Bash(npm run *)",
+      "Bash(npm install *)",
+      "Bash(lsof -ti:8080)",
+      "Bash(xargs kill *)",
+      "Bash(gh auth *)",
+      "Bash(git branch *)",
+      "Bash(git add *)"
+    ]
+  }
+}

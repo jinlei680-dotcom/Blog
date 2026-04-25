@@ -1,0 +1,23 @@
+{
+  "mcpServers": {
+    "chrome-devtools": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "chrome-devtools-mcp@latest",
+        "--port=9222"
+      ],
+      "autoApprove": [
+        "list_network_requests",
+        "take_screenshot",
+        "evaluate_script",
+        "take_snapshot",
+        "click",
+        "wait_for",
+        "navigate_page",
+        "list_console_messages",
+        "fill_form"
+      ]
+    }
+  }
+}
