@@ -1,67 +1,66 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
-
 ## Project Overview
 
-Full-stack blog application with:
-- **Frontend**: Nuxt 3 (Vue 3) + Pinia + TypeScript at `blog-frontend/`
-- **Backend**: Spring Boot 2.7.18 + MySQL + JWT at `blog-backend/`
-- **Frontend** proxies `/api/**` → `http://localhost:8080/api/**`
+Full-stack blog application (Wanderlust) — Nuxt 3 frontend + Spring Boot 2.7.18 backend + MySQL 8.0.
+Frontend dev server proxies `/api/**` → `http://localhost:8080/api/**`.
 
 ## Commands
 
 ### Frontend (`blog-frontend/`)
 ```bash
-npm install
-npm run dev        # Dev server at http://localhost:3000
-npm run build      # Production build
-npm run generate   # Static site generation
-npm run preview    # Preview production build
-npm run test       # Run Vitest tests (--run, non-watch)
+npm install && npm run dev     # http://localhost:3000
+npm run build                  # Production build
+npm run test                   # Vitest (--run, non-watch)
 ```
 
 ### Backend (`blog-backend/`)
 ```bash
-mvn spring-boot:run   # Start on port 8080
-mvn test              # Run all tests
-mvn package           # Build JAR
+mvn spring-boot:run -Dspring-boot.run.profiles=local   # Port 8080, remote DB
+mvn test                                                # H2, no remote DB needed
+mvn package                                             # Build JAR
 ```
 
 ### Database
-- MySQL 运行在云服务器 Docker 容器中：`124.222.154.124:13306`，容器名 `mysql-blog`
-- 数据库名：`my_blog`，root 密码：`Blog@2024!`
-- 容器已设置 `--restart always`，服务器重启后自动拉起
-- H2 in-memory DB used for backend tests
+- MySQL Docker container: `124.222.154.124:13306`, database `my_blog`, root/`Blog@2024!`
+- Local dev requires `local` profile; default config points to `localhost:3306`
+- H2 in-memory for tests
 
-## Architecture
+## Frontend Architecture (`blog-frontend/app/`)
 
-### Frontend (`blog-frontend/app/`)
+**Rendering**: SSR for homepage/article/tag/user/search; CSR for create/edit/login/register (see `nuxt.config.ts` routeRules).
 
-**Rendering strategy** (set per-route in `nuxt.config.ts`):
-- SSR: homepage, article detail, tag pages, user profiles, search
-- CSR: create/edit article, login, register
+**Composables-first pattern**: All API calls live in `composables/`. Components are thin — they consume composables, never call `$fetch` directly. 12 composables covering articles, auth, bookmarks, comments, drafts, likes, music, notifications, profiles, search, tags, uploads.
 
-**State management**: Pinia stores in `stores/` (`auth.js`, `notification.js`). Auth state is initialized in `plugins/auth.client.js`. API client is set up in `plugins/api.client.js`.
+**State**: Two Pinia stores — `auth.js` (token/user/role, persisted to localStorage) and `notification.js` (unreadCount). Auth restored on startup via `plugins/auth.client.js`. Global `$fetch` interceptor in `plugins/api.client.js` redirects to login on 401.
 
-**Route guards**: `middleware/auth.js` (require login) and `middleware/admin.js` (require admin role).
+**Auth flow**: JWT stored in localStorage → sent as Bearer header via composables → 401 interceptor clears state and redirects. Middleware: `auth.js` (require login), `admin.js` (require admin).
 
-**Composables** in `composables/` encapsulate all API call logic (e.g., `useArticle.js`, `useAuth.js`, `useComment.js`). Components consume composables rather than calling `$fetch` directly.
+**Key dependencies**: `md-editor-v3` for markdown editing/rendering, `dompurify` for XSS sanitization.
 
-### Backend (`blog-backend/src/main/java/com/blog/`)
+**Design**: Warm-toned glassmorphism with CSS variables. fonts: Poppins + Inter + PingFang SC. Effects: backdrop-blur, 3D card tilt, scroll-reveal, reading progress bar.
 
-**Request flow**: Controller → Service interface → ServiceImpl → Repository (Spring Data JPA) → MySQL
+## Backend Architecture (`blog-backend/`)
 
-**Security**: JWT filter (`JwtAuthenticationFilter`) validates tokens before controllers. Config in `SecurityConfig.java`. Tokens expire after 24 hours.
+**Flow**: Controller → Service interface → ServiceImpl → Repository (Spring Data JPA) → MySQL. All responses wrapped in `ApiResponse<T>`.
 
-**API response format**: All endpoints return `ApiResponse<T>` wrapper from `common/ApiResponse.java`.
+**Security**: Stateless JWT (HS512, 24h expiry). `JwtAuthenticationFilter` extracts Bearer token, validates, sets SecurityContext. Public GET endpoints for articles/music/tags/users; POST `/api/auth/**` also public. All other mutations require auth.
 
-**File uploads**: Stored locally in `./uploads` directory relative to backend working directory. Served via `FileController`.
+**Entities** (8 tables): User, Article, Tag, ArticleTag (M2M junction), ArticleLike, Comment (self-referencing for replies), Music, Notification.
 
-**Key entities**: User, Article, Comment, Tag, ArticleTag (many-to-many junction), ArticleLike, Music, Notification
+**File uploads**: Stored in `./uploads/{images,avatars}` with UUID naming. Served via static resource mapping.
 
-### Testing
+**Testing**: JUnit 5 + Mockito (unit), MockMvc + H2 (integration), jqwik (property-based). 11 test files total.
 
-**Frontend**: Vitest + Vue Test Utils. Tests in `app/__tests__/`. Setup in `vitest.setup.js` (localStorage polyfill for jsdom).
+## Key Conventions
 
-**Backend**: JUnit 5 + jqwik (property-based testing) + Spring Test. H2 replaces MySQL in test context.
+- Components don't call `$fetch` — always go through composables
+- Backend DTOs are separated into request/response classes under `dto/`
+- All API responses use the `ApiResponse<T>` wrapper
+- Client-only components (editor, renderer) handle SSR fallback with `<ClientOnly>`
+- Drafts and bookmarks are client-side only (localStorage), no backend API
+- Backend profile `local` must be active when connecting to remote MySQL
+
+## Reference
+
+Detailed file listings and API endpoint tables → `docs/reference.md`
