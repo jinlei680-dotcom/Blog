@@ -1,10 +1,10 @@
 package com.blog.controller;
 
 import com.blog.common.ApiResponse;
-import com.blog.dto.CreateMusicRequest;
 import com.blog.dto.MusicDTO;
 import com.blog.service.MusicService;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -20,13 +20,20 @@ public class MusicController {
 
     @GetMapping
     public ApiResponse<List<MusicDTO>> list() {
-        List<MusicDTO> musicList = musicService.list();
-        return ApiResponse.success(musicList);
+        return ApiResponse.success(musicService.list());
     }
 
     @PostMapping
-    public ApiResponse<MusicDTO> create(@RequestBody CreateMusicRequest request) {
-        MusicDTO music = musicService.create(request);
-        return ApiResponse.success("音乐创建成功", music);
+    public ApiResponse<MusicDTO> create(
+            @RequestParam("name") String name,
+            @RequestParam("file") MultipartFile file) {
+        MusicDTO music = musicService.create(name, file);
+        return ApiResponse.success("音乐上传成功", music);
+    }
+
+    @DeleteMapping("/{id}")
+    public ApiResponse<Void> delete(@PathVariable Long id) {
+        musicService.delete(id);
+        return ApiResponse.success("音乐已删除", null);
     }
 }

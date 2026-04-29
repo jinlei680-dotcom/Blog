@@ -85,11 +85,7 @@
       <slot />
     </main>
 
-    <div class="music-player-container">
-      <ClientOnly>
-        <MusicPlayer />
-      </ClientOnly>
-    </div>
+    <MusicPlayer />
 
     <footer class="app-footer">
       <div class="footer-inner">
@@ -671,15 +667,6 @@ a { color: inherit; text-decoration: none; }
 @keyframes pageEnter {
   from { opacity: 0; transform: translateY(16px); }
   to { opacity: 1; transform: translateY(0); }
-}
-
-/* ===== Music Player ===== */
-.music-player-container {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  z-index: 50;
 }
 
 /* ===== Footer ===== */

@@ -22,7 +22,8 @@ export default defineNuxtConfig({
     '/tags/**': { ssr: true },
     '/users/**': { ssr: true },
     '/login': { ssr: false },
-    '/register': { ssr: false }
+    '/register': { ssr: false },
+    '/admin/**': { ssr: false }
   },
 
   // API proxy: forward /api/** to backend on port 8080
@@ -31,11 +32,18 @@ export default defineNuxtConfig({
       '/api': {
         target: 'http://localhost:8080/api',
         changeOrigin: true
+      },
+      '/uploads': {
+        target: 'http://localhost:8080/uploads',
+        changeOrigin: true
       }
     },
     routeRules: {
       '/api/**': {
         proxy: 'http://localhost:8080/api/**'
+      },
+      '/uploads/**': {
+        proxy: 'http://localhost:8080/uploads/**'
       }
     },
     publicAssets: [

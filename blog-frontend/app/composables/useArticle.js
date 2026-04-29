@@ -59,9 +59,21 @@ export function useArticle() {
     return res
   }
 
+  async function fetchFeatured(size = 3) {
+    const res = await $fetch('/api/articles/featured', { params: { size } })
+    return res.data
+  }
+
+  async function fetchStats() {
+    const res = await $fetch('/api/articles/stats')
+    return res.data
+  }
+
   return {
     fetchArticles,
     fetchArticle,
+    fetchFeatured,
+    fetchStats,
     createArticle,
     updateArticle,
     deleteArticle

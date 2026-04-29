@@ -12,7 +12,6 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Builder
 public class MusicDTO {
-
     private Long id;
     private String name;
     private String filePath;

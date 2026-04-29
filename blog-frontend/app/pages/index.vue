@@ -251,9 +251,13 @@
 <script setup>
 import { computed, ref, onMounted, nextTick } from 'vue'
 import { useAuthStore } from '~/stores/auth'
+import { useArticle } from '~/composables/useArticle'
+import { useTag } from '~/composables/useTag'
 
 const authStore = useAuthStore()
 const route = useRoute()
+const { fetchArticles, fetchFeatured, fetchStats } = useArticle()
+const { fetchTags } = useTag()
 
 const heroWords = ['生活', '不止', '眼前的代码，', '还有', '诗和', '远方']
 
@@ -262,26 +266,17 @@ const currentPage = computed(() => {
   return isNaN(p) ? 0 : p
 })
 
-// Fetch articles, stats, featured, and tags in parallel
 const { data: pageData, error, status, refresh } = await useAsyncData(
   `articles-page-${currentPage.value}`,
-  () => $fetch('/api/articles', {
-    params: { page: currentPage.value, size: 10 }
-  }).then(res => res.data),
+  () => fetchArticles(currentPage.value, 10),
   { watch: [currentPage] }
 )
 
-const { data: statsData } = await useAsyncData('site-stats', () =>
-  $fetch('/api/articles/stats').then(res => res.data)
-)
+const { data: statsData } = await useAsyncData('site-stats', () => fetchStats())
 
-const { data: featuredData } = await useAsyncData('featured-articles', () =>
-  $fetch('/api/articles/featured', { params: { size: 3 } }).then(res => res.data)
-)
+const { data: featuredData } = await useAsyncData('featured-articles', () => fetchFeatured(3))
 
-const { data: tagsData } = await useAsyncData('all-tags', () =>
-  $fetch('/api/tags').then(res => res.data)
-)
+const { data: tagsData } = await useAsyncData('all-tags', () => fetchTags())
 
 const articles = computed(() => pageData.value?.content || [])
 const stats = computed(() => statsData.value)

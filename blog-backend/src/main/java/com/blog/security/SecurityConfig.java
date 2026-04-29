@@ -39,6 +39,11 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     }
 
     @Override
+    public void configure(org.springframework.security.config.annotation.web.builders.WebSecurity web) {
+        web.ignoring().antMatchers("/uploads/**");
+    }
+
+    @Override
     protected void configure(HttpSecurity http) throws Exception {
         http
             .cors().and()
@@ -58,10 +63,12 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             .authorizeRequests()
                 .antMatchers("/api/auth/**").permitAll()
                 .antMatchers(HttpMethod.GET, "/api/articles/**").permitAll()
-                .antMatchers(HttpMethod.GET, "/api/music/**").permitAll()
-                .antMatchers(HttpMethod.GET, "/api/tags", "/api/tags/**").permitAll()
+.antMatchers(HttpMethod.GET, "/api/tags", "/api/tags/**").permitAll()
                 .antMatchers(HttpMethod.GET, "/api/users/**").permitAll()
                 .antMatchers(HttpMethod.GET, "/api/articles/search**").permitAll()
+                .antMatchers(HttpMethod.GET, "/api/settings/**").permitAll()
+                .antMatchers(HttpMethod.GET, "/api/music/**").permitAll()
+                .antMatchers(HttpMethod.GET, "/uploads/**").permitAll()
                 .anyRequest().authenticated()
             .and()
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
