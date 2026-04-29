@@ -209,7 +209,7 @@ async function handleSubmit() {
   transition: color var(--transition-fast);
 }
 
-.back-link:hover { color: #a78bfa; }
+.back-link:hover { color: var(--color-accent); }
 
 .loading-state,
 .error-state {
@@ -235,7 +235,7 @@ async function handleSubmit() {
   font-family: var(--font-chinese);
   font-size: 2rem;
   font-weight: 700;
-  background: linear-gradient(135deg, #a78bfa, #06b6d4);
+  background: linear-gradient(135deg, var(--color-accent), var(--color-accent-cyan));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -259,8 +259,8 @@ async function handleSubmit() {
   gap: var(--space-md);
   padding: 0.75rem 1.2rem;
   margin-bottom: var(--space-lg);
-  background: rgba(6, 182, 212, 0.1);
-  border: 1px solid rgba(6, 182, 212, 0.3);
+  background: rgba(9, 132, 227, 0.1);
+  border: 1px solid rgba(9, 132, 227, 0.3);
   border-radius: var(--radius-md);
   backdrop-filter: blur(8px);
 }
@@ -288,15 +288,15 @@ async function handleSubmit() {
 }
 
 .draft-btn--restore {
-  background: rgba(6, 182, 212, 0.2);
+  background: rgba(9, 132, 227, 0.2);
   color: #67e8f9;
-  border: 1px solid rgba(6, 182, 212, 0.4);
+  border: 1px solid rgba(9, 132, 227, 0.4);
 }
 
-.draft-btn--restore:hover { background: rgba(6, 182, 212, 0.35); }
+.draft-btn--restore:hover { background: rgba(9, 132, 227, 0.35); }
 
 .draft-btn--discard {
-  background: rgba(255, 255, 255, 0.06);
+  background: var(--color-border-light);
   color: var(--color-text-muted);
   border: 1px solid var(--glass-border);
 }
@@ -333,15 +333,15 @@ async function handleSubmit() {
   border-radius: var(--radius-md);
   background: var(--glass-bg);
   backdrop-filter: blur(8px);
-  color: rgba(255, 255, 255, 0.9);
+  color: var(--color-text);
   transition: all var(--transition-fast);
   outline: none;
 }
 
 .form-input:focus {
   border-color: var(--color-accent);
-  background: rgba(139, 92, 246, 0.08);
-  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.15);
+  background: rgba(0, 184, 148, 0.08);
+  box-shadow: 0 0 0 3px rgba(0, 184, 148, 0.15);
 }
 
 .form-input::placeholder { color: var(--color-text-muted); font-weight: 400; }
@@ -401,7 +401,7 @@ async function handleSubmit() {
 .btn-primary:hover {
   opacity: 0.9;
   transform: translateY(-1px);
-  box-shadow: 0 6px 24px rgba(139, 92, 246, 0.4);
+  box-shadow: 0 6px 24px rgba(0, 184, 148, 0.4);
 }
 
 .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
@@ -415,7 +415,7 @@ async function handleSubmit() {
 
 .btn-ghost:hover {
   border-color: var(--color-accent);
-  color: #a78bfa;
+  color: var(--color-accent);
   background: var(--color-accent-light);
 }
 

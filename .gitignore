@@ -28,3 +28,4 @@ blog-backend/src/main/resources/application-local.yml
 # Local dev tool configs
 .claude/
 .kiro/
+.mcp.json

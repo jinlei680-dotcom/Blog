@@ -318,7 +318,7 @@ function formatDate(dateStr) {
   font-family: var(--font-chinese);
   font-size: 1.15rem;
   font-weight: 600;
-  color: rgba(255, 255, 255, 0.9);
+  color: var(--color-text);
   margin-bottom: 0.5rem;
   line-height: 1.5;
   overflow: hidden;
@@ -328,7 +328,7 @@ function formatDate(dateStr) {
 }
 
 .article-card:hover .article-card-title {
-  color: #a78bfa;
+  color: var(--color-accent);
 }
 
 .article-card-meta {

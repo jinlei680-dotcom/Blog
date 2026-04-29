@@ -18,4 +18,8 @@ public interface ArticleService {
     Page<ArticleSummaryDTO> search(String keyword, int page, int size);
 
     Page<ArticleSummaryDTO> listByUser(Long userId, int page, int size);
+
+    Page<ArticleSummaryDTO> listFeatured(int page, int size);
+
+    SiteStatsDTO getSiteStats();
 }

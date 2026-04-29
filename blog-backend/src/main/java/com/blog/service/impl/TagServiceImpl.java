@@ -53,7 +53,14 @@ public class TagServiceImpl implements TagService {
     @Transactional(readOnly = true)
     public List<TagDTO> listAll() {
         return tagRepository.findAll().stream()
-                .map(this::toTagDTO)
+                .map(tag -> {
+                    long articleCount = articleTagRepository.countByTagId(tag.getId());
+                    return TagDTO.builder()
+                            .id(tag.getId())
+                            .name(tag.getName())
+                            .articleCount(articleCount)
+                            .build();
+                })
                 .collect(Collectors.toList());
     }
 
@@ -87,6 +94,7 @@ public class TagServiceImpl implements TagService {
                     .authorId(article.getAuthor().getId())
                     .createdAt(article.getCreatedAt())
                     .likeCount(likeCount)
+                    .featured(article.getFeatured())
                     .tags(tags)
                     .build();
         });

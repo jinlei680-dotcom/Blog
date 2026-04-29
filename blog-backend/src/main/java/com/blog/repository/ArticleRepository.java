@@ -19,4 +19,9 @@ public interface ArticleRepository extends JpaRepository<Article, Long> {
     long countByAuthorId(Long authorId);
 
     Page<Article> findByAuthorIdOrderByCreatedAtDesc(Long authorId, Pageable pageable);
+
+    Page<Article> findByFeaturedTrueOrderByCreatedAtDesc(Pageable pageable);
+
+    @Query("SELECT COALESCE(SUM(LENGTH(a.content)), 0) FROM Article a")
+    long sumContentLength();
 }

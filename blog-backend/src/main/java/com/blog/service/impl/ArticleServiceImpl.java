@@ -62,6 +62,7 @@ public class ArticleServiceImpl implements ArticleService {
                 .title(request.getTitle().trim())
                 .content(request.getContent().trim())
                 .author(author)
+                .featured(request.getFeatured() != null && request.getFeatured())
                 .build();
 
         article = articleRepository.save(article);
@@ -92,6 +93,9 @@ public class ArticleServiceImpl implements ArticleService {
 
         article.setTitle(request.getTitle().trim());
         article.setContent(request.getContent().trim());
+        if (request.getFeatured() != null) {
+            article.setFeatured(request.getFeatured());
+        }
         article = articleRepository.save(article);
 
         // Update tag associations: clear old, create new
@@ -174,6 +178,7 @@ public class ArticleServiceImpl implements ArticleService {
                 .authorId(article.getAuthor().getId())
                 .createdAt(article.getCreatedAt())
                 .likeCount(likeCount)
+                .featured(article.getFeatured())
                 .tags(getTagsForArticle(article.getId()))
                 .build();
     }
@@ -215,6 +220,25 @@ public class ArticleServiceImpl implements ArticleService {
     public Page<ArticleSummaryDTO> listByUser(Long userId, int page, int size) {
         Page<Article> articles = articleRepository.findByAuthorIdOrderByCreatedAtDesc(userId, PageRequest.of(page, size));
         return articles.map(this::toArticleSummaryDTO);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<ArticleSummaryDTO> listFeatured(int page, int size) {
+        Page<Article> articles = articleRepository.findByFeaturedTrueOrderByCreatedAtDesc(PageRequest.of(page, size));
+        return articles.map(this::toArticleSummaryDTO);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public SiteStatsDTO getSiteStats() {
+        return SiteStatsDTO.builder()
+                .articleCount(articleRepository.count())
+                .totalWords(articleRepository.sumContentLength())
+                .totalLikes(articleLikeRepository.count())
+                .userCount(userRepository.count())
+                .commentCount(commentRepository.count())
+                .build();
     }
 
     private boolean isCurrentUserAdmin() {

@@ -166,18 +166,21 @@ onBeforeUnmount(() => {
 
 <style scoped>
 .music-player {
-  background: var(--color-dark, #1a1a1a);
-  color: rgba(255, 255, 255, 0.85);
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-top: 1px solid var(--color-border);
+  color: var(--color-text);
   font-family: var(--font-body, 'DM Sans', sans-serif);
   position: relative;
-  box-shadow: 0 -2px 20px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 -2px 20px rgba(0, 0, 0, 0.06);
 }
 
 /* Thin progress bar at top of player */
 .player-progress-bar {
   width: 100%;
   height: 3px;
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(0, 0, 0, 0.04);
   cursor: pointer;
   position: relative;
 }
@@ -240,7 +243,7 @@ onBeforeUnmount(() => {
 .player-btn {
   background: none;
   border: none;
-  color: rgba(255, 255, 255, 0.7);
+  color: var(--color-text-secondary);
   cursor: pointer;
   padding: 0.4rem;
   border-radius: 50%;
@@ -252,7 +255,7 @@ onBeforeUnmount(() => {
 
 .player-btn:hover {
   color: white;
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(0, 0, 0, 0.04);
 }
 
 .player-btn--play {
@@ -272,7 +275,7 @@ onBeforeUnmount(() => {
 /* Time display */
 .player-time {
   font-size: 0.75rem;
-  color: rgba(255, 255, 255, 0.45);
+  color: var(--color-text-muted);
   white-space: nowrap;
   flex-shrink: 0;
   font-variant-numeric: tabular-nums;

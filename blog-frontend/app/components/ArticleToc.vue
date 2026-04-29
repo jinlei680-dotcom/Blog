@@ -85,23 +85,23 @@ if (import.meta.client) {
   background: rgba(15, 12, 41, 0.85);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(139, 92, 246, 0.2);
+  border: 1px solid rgba(0, 184, 148, 0.2);
   border-radius: 12px;
   padding: 1rem;
   z-index: 80;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
   scrollbar-width: thin;
-  scrollbar-color: rgba(139, 92, 246, 0.3) transparent;
+  scrollbar-color: rgba(0, 184, 148, 0.3) transparent;
 }
 
 .article-toc::-webkit-scrollbar { width: 4px; }
-.article-toc::-webkit-scrollbar-thumb { background: rgba(139, 92, 246, 0.3); border-radius: 2px; }
+.article-toc::-webkit-scrollbar-thumb { background: rgba(0, 184, 148, 0.3); border-radius: 2px; }
 
 .toc-title {
   font-family: var(--font-chinese, sans-serif);
   font-size: 0.72rem;
   font-weight: 600;
-  color: rgba(255, 255, 255, 0.4);
+  color: var(--color-text-muted);
   letter-spacing: 0.12em;
   text-transform: uppercase;
   margin-bottom: 0.6rem;
@@ -123,7 +123,7 @@ if (import.meta.client) {
   padding: 0.3rem 0.5rem;
   font-family: var(--font-chinese, sans-serif);
   font-size: 0.78rem;
-  color: rgba(255, 255, 255, 0.5);
+  color: var(--color-text-muted);
   border-radius: 6px;
   text-decoration: none;
   line-height: 1.4;
@@ -134,13 +134,13 @@ if (import.meta.client) {
 }
 
 .toc-link:hover {
-  color: rgba(255, 255, 255, 0.85);
-  background: rgba(139, 92, 246, 0.1);
+  color: var(--color-text);
+  background: rgba(0, 184, 148, 0.1);
 }
 
 .toc-active .toc-link {
-  color: #a78bfa;
-  background: rgba(139, 92, 246, 0.15);
+  color: var(--color-accent);
+  background: rgba(0, 184, 148, 0.15);
   font-weight: 500;
 }
 

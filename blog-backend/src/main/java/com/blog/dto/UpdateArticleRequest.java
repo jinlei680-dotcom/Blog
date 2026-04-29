@@ -14,4 +14,5 @@ public class UpdateArticleRequest {
     private String title;
     private String content;
     private List<Long> tagIds;
+    private Boolean featured;
 }

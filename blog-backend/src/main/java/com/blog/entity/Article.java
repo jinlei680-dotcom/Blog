@@ -36,6 +36,10 @@ public class Article {
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
 
+    @Column(nullable = false)
+    @Builder.Default
+    private Boolean featured = false;
+
     @PrePersist
     protected void onCreate() {
         LocalDateTime now = LocalDateTime.now();

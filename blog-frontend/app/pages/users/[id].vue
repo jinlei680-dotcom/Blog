@@ -412,7 +412,7 @@ function formatDate(dateStr) {
 
 /* ===== Profile Header ===== */
 .profile-header {
-  background-image: url('/images/profile-bg.jpg');
+  background-image: url('/images/profile-bg-light.jpg');
   background-size: cover;
   background-position: center top;
   border-radius: var(--radius-lg);
@@ -487,7 +487,7 @@ function formatDate(dateStr) {
   font-family: var(--font-display);
   font-size: 1.8rem;
   font-weight: 700;
-  background: linear-gradient(135deg, #e2d9fa, #a5f3fc);
+  background: linear-gradient(135deg, #00b894, #0984e3);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -526,7 +526,7 @@ function formatDate(dateStr) {
   font-family: var(--font-display);
   font-size: 2rem;
   font-weight: 700;
-  background: linear-gradient(135deg, #a78bfa, #06b6d4);
+  background: linear-gradient(135deg, var(--color-accent), var(--color-accent-cyan));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -580,7 +580,7 @@ function formatDate(dateStr) {
   font-family: var(--font-chinese);
   font-size: 1.4rem;
   font-weight: 700;
-  color: rgba(255, 255, 255, 0.9);
+  color: var(--color-text);
 }
 
 .section-title-sub {
@@ -635,7 +635,7 @@ function formatDate(dateStr) {
   font-family: var(--font-chinese);
   font-size: 1.2rem;
   font-weight: 600;
-  color: rgba(255, 255, 255, 0.85);
+  color: var(--color-text);
   margin-bottom: var(--space-sm);
 }
 
@@ -694,7 +694,7 @@ function formatDate(dateStr) {
   font-family: var(--font-chinese);
   font-size: 1.15rem;
   font-weight: 600;
-  color: rgba(255, 255, 255, 0.9);
+  color: var(--color-text);
   margin-bottom: 0.5rem;
   line-height: 1.5;
   overflow: hidden;
@@ -704,7 +704,7 @@ function formatDate(dateStr) {
 }
 
 .article-card:hover .article-card-title {
-  color: #a78bfa;
+  color: var(--color-accent);
 }
 
 .article-card-meta {
@@ -886,18 +886,18 @@ function formatDate(dateStr) {
 
 .bio-edit-btn:hover {
   border-color: var(--color-accent);
-  color: #a78bfa;
+  color: var(--color-accent);
 }
 
 .bio-textarea {
   width: 100%;
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--color-border-light);
   border: 1.5px solid var(--glass-border);
   border-radius: var(--radius-md);
   padding: var(--space-md);
   font-family: var(--font-chinese);
   font-size: 0.92rem;
-  color: rgba(255, 255, 255, 0.9);
+  color: var(--color-text);
   resize: vertical;
   outline: none;
   transition: border-color var(--transition-fast);
@@ -906,7 +906,7 @@ function formatDate(dateStr) {
 
 .bio-textarea:focus {
   border-color: var(--color-accent);
-  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.15);
+  box-shadow: 0 0 0 3px rgba(0, 184, 148, 0.15);
 }
 
 .bio-textarea::placeholder {

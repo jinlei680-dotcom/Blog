@@ -20,5 +20,6 @@ public class ArticleSummaryDTO {
     private Long authorId;
     private LocalDateTime createdAt;
     private long likeCount;
+    private Boolean featured;
     private List<TagDTO> tags;
 }

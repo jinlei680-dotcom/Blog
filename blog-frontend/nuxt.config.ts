@@ -52,7 +52,7 @@ export default defineNuxtConfig({
   app: {
     head: {
       link: [
-        { rel: 'preload', as: 'image', href: '/images/hero-bg.jpg' }
+        { rel: 'preload', as: 'image', href: '/images/hero-light.jpg' }
       ]
     }
   }

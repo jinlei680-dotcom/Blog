@@ -37,21 +37,87 @@
       </div>
     </section>
 
-    <!-- Stats Bar -->
+    <!-- Enhanced Stats Bar -->
     <section class="stats-bar" ref="statsBarEl">
       <div class="stat-chip">
-        <span class="stat-num" ref="statCountEl">{{ statCountDisplay }}</span>
+        <span class="stat-num" ref="statArticleEl">0</span>
         <span class="stat-lab">篇文章</span>
       </div>
       <div class="stat-sep"></div>
       <div class="stat-chip">
-        <span class="stat-num">每天</span>
-        <span class="stat-lab">在更新</span>
+        <span class="stat-num" ref="statWordsEl">0</span>
+        <span class="stat-lab">字</span>
       </div>
       <div class="stat-sep"></div>
       <div class="stat-chip">
-        <span class="stat-num">∞</span>
-        <span class="stat-lab">个故事</span>
+        <span class="stat-num" ref="statLikesEl">0</span>
+        <span class="stat-lab">获赞</span>
+      </div>
+      <div class="stat-sep"></div>
+      <div class="stat-chip">
+        <span class="stat-num" ref="statUsersEl">0</span>
+        <span class="stat-lab">位用户</span>
+      </div>
+      <div class="stat-sep"></div>
+      <div class="stat-chip">
+        <span class="stat-num" ref="statCommentsEl">0</span>
+        <span class="stat-lab">条评论</span>
+      </div>
+    </section>
+
+    <!-- Featured Articles Section -->
+    <section v-if="featuredArticles && featuredArticles.length > 0" class="featured-section">
+      <div class="section-inner">
+        <div class="section-header">
+          <div class="section-header-left">
+            <h2 class="section-title">精选推荐</h2>
+            <p class="section-subtitle">Editor's Picks</p>
+          </div>
+        </div>
+        <div class="featured-grid">
+          <article
+            v-for="article in featuredArticles"
+            :key="article.id"
+            class="featured-card glass-card"
+            data-reveal
+          >
+            <NuxtLink :to="`/articles/${article.id}`" class="featured-card-link">
+              <div class="featured-card-accent"></div>
+              <h3 class="featured-card-title">{{ article.title }}</h3>
+              <p class="featured-card-meta">
+                <span>{{ article.authorName }}</span>
+                <span>·</span>
+                <span>{{ formatDate(article.createdAt) }}</span>
+                <span v-if="article.likeCount > 0">· ♥ {{ article.likeCount }}</span>
+              </p>
+            </NuxtLink>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- Tag Cloud Section -->
+    <section class="tag-cloud-section">
+      <div class="section-inner">
+        <div class="section-header">
+          <div class="section-header-left">
+            <h2 class="section-title">探索话题</h2>
+            <p class="section-subtitle">Explore Topics</p>
+          </div>
+        </div>
+        <div class="tag-cloud">
+          <NuxtLink
+            v-for="tag in allTags"
+            :key="tag.id"
+            :to="`/tags/${tag.id}`"
+            class="tag-pill"
+            :style="{ fontSize: (0.8 + Math.min(tag.articleCount, 20) * 0.04) + 'rem' }"
+          >
+            {{ tag.name }}
+            <span class="tag-pill-count" v-if="tag.articleCount > 0">{{ tag.articleCount }}</span>
+          </NuxtLink>
+          <p v-if="allTags.length === 0" class="tag-empty">暂无话题</p>
+        </div>
       </div>
     </section>
 
@@ -196,6 +262,7 @@ const currentPage = computed(() => {
   return isNaN(p) ? 0 : p
 })
 
+// Fetch articles, stats, featured, and tags in parallel
 const { data: pageData, error, status, refresh } = await useAsyncData(
   `articles-page-${currentPage.value}`,
   () => $fetch('/api/articles', {
@@ -204,7 +271,22 @@ const { data: pageData, error, status, refresh } = await useAsyncData(
   { watch: [currentPage] }
 )
 
+const { data: statsData } = await useAsyncData('site-stats', () =>
+  $fetch('/api/articles/stats').then(res => res.data)
+)
+
+const { data: featuredData } = await useAsyncData('featured-articles', () =>
+  $fetch('/api/articles/featured', { params: { size: 3 } }).then(res => res.data)
+)
+
+const { data: tagsData } = await useAsyncData('all-tags', () =>
+  $fetch('/api/tags').then(res => res.data)
+)
+
 const articles = computed(() => pageData.value?.content || [])
+const stats = computed(() => statsData.value)
+const featuredArticles = computed(() => featuredData.value?.content || [])
+const allTags = computed(() => tagsData.value || [])
 
 const visiblePages = computed(() => {
   if (!pageData.value) return []
@@ -231,7 +313,7 @@ function formatDate(dateStr) {
 }
 
 // Accent colors for article cards
-const ACCENTS = ['#8b5cf6','#06b6d4','#f59e0b','#10b981','#f43f5e','#3b82f6','#ec4899']
+const ACCENTS = ['#00b894','#0984e3','#f59e0b','#10b981','#ff7675','#6c5ce7','#fd79a8']
 function accentColor(id) {
   return ACCENTS[Number(id) % ACCENTS.length]
 }
@@ -272,8 +354,11 @@ function addRipple(e) {
 
 // Stats countUp
 const statsBarEl = ref(null)
-const statCountEl = ref(null)
-const statCountDisplay = ref('—')
+const statArticleEl = ref(null)
+const statWordsEl = ref(null)
+const statLikesEl = ref(null)
+const statUsersEl = ref(null)
+const statCommentsEl = ref(null)
 
 function countUp(el, target, dur = 1400) {
   const t0 = performance.now()
@@ -283,6 +368,11 @@ function countUp(el, target, dur = 1400) {
     if (p < 1) requestAnimationFrame(tick)
   }
   requestAnimationFrame(tick)
+}
+
+function formatLargeNum(n) {
+  if (n >= 10000) return (n / 10000).toFixed(1) + '万'
+  return String(n)
 }
 
 // Intersection Observer for scroll reveal + stats
@@ -307,13 +397,17 @@ if (import.meta.client) {
     document.querySelectorAll('[data-reveal]').forEach(el => io.observe(el))
 
     // Stats countUp
-    const total = pageData.value?.totalElements ?? 0
     const statsIo = new IntersectionObserver((entries) => {
       entries.forEach(e => {
-        if (e.isIntersecting && statCountEl.value) {
-          countUp(statCountEl.value, total)
-          statsIo.disconnect()
-        }
+        if (!e.isIntersecting) return
+        const s = stats.value
+        if (!s) return
+        if (statArticleEl.value) countUp(statArticleEl.value, s.articleCount)
+        if (statWordsEl.value) statWordsEl.value.textContent = formatLargeNum(s.totalWords)
+        if (statLikesEl.value) countUp(statLikesEl.value, s.totalLikes)
+        if (statUsersEl.value) countUp(statUsersEl.value, s.userCount)
+        if (statCommentsEl.value) countUp(statCommentsEl.value, s.commentCount)
+        statsIo.disconnect()
       })
     }, { threshold: 0.5 })
     if (statsBarEl.value) statsIo.observe(statsBarEl.value)
@@ -340,22 +434,22 @@ if (import.meta.client) {
 .hero-bg-image {
   position: absolute;
   inset: 0;
-  background: url('/images/hero-bg.jpg') center 30% / cover;
+  background: url('/images/hero-light.jpg') center 30% / cover;
   opacity: 0.25;
 }
 
 .hero-bg-overlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(to bottom, rgba(15,12,41,0.3) 0%, rgba(15,12,41,0.85) 100%);
+  background: linear-gradient(to bottom, rgba(250,249,246,0.2) 0%, rgba(250,249,246,0.75) 100%);
 }
 
 .hero-aurora {
   position: absolute;
   inset: 0;
   background:
-    radial-gradient(ellipse 80% 50% at 20% 40%, rgba(139,92,246,0.12) 0%, transparent 50%),
-    radial-gradient(ellipse 60% 40% at 80% 60%, rgba(6,182,212,0.1) 0%, transparent 50%);
+    radial-gradient(ellipse 80% 50% at 20% 40%, rgba(0,184,148,0.06) 0%, transparent 50%),
+    radial-gradient(ellipse 60% 40% at 80% 60%, rgba(9,132,227,0.05) 0%, transparent 50%);
   animation: auroraShift 12s ease-in-out infinite alternate;
 }
 
@@ -371,7 +465,7 @@ if (import.meta.client) {
   width: 600px;
   height: 600px;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(139, 92, 246, 0.08) 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(0, 184, 148, 0.05) 0%, transparent 70%);
   animation: floatSlow 20s ease-in-out infinite;
 }
 
@@ -453,9 +547,9 @@ if (import.meta.client) {
   justify-content: center;
   gap: var(--space-xl);
   padding: var(--space-xl) var(--space-xl);
-  background: rgba(255,255,255,0.04);
-  border-top: 1px solid var(--glass-border);
-  border-bottom: 1px solid var(--glass-border);
+  background: var(--glass-bg);
+  border-top: 1px solid var(--color-border);
+  border-bottom: 1px solid var(--color-border);
   backdrop-filter: blur(12px);
 }
 
@@ -470,7 +564,7 @@ if (import.meta.client) {
   font-family: var(--font-display);
   font-size: 1.8rem;
   font-weight: 700;
-  background: linear-gradient(135deg, #a78bfa, #06b6d4);
+  background: linear-gradient(135deg, #00b894, #0984e3);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -517,7 +611,7 @@ if (import.meta.client) {
 .btn-primary:hover {
   opacity: 0.9;
   transform: translateY(-2px);
-  box-shadow: 0 8px 30px rgba(139, 92, 246, 0.4);
+  box-shadow: 0 8px 30px rgba(0, 184, 148, 0.3);
 }
 
 .btn-ghost {
@@ -552,7 +646,7 @@ if (import.meta.client) {
 .btn-write:hover {
   opacity: 0.9;
   transform: translateY(-1px);
-  box-shadow: 0 4px 20px rgba(139, 92, 246, 0.4);
+  box-shadow: 0 4px 20px rgba(0, 184, 148, 0.3);
 }
 
 .btn-write-icon {
@@ -590,10 +684,7 @@ if (import.meta.client) {
   font-family: var(--font-chinese);
   font-size: 1.8rem;
   font-weight: 700;
-  background: linear-gradient(135deg, #e2d9fa, #a5f3fc);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  color: var(--color-dark);
   margin-bottom: 0.2rem;
 }
 
@@ -644,7 +735,7 @@ if (import.meta.client) {
   font-family: var(--font-chinese);
   font-size: 1.2rem;
   font-weight: 600;
-  color: rgba(255, 255, 255, 0.85);
+  color: var(--color-text);
   margin-bottom: var(--space-sm);
 }
 
@@ -676,14 +767,14 @@ if (import.meta.client) {
 
 /* ===== Featured Article ===== */
 .article-featured {
-  background: linear-gradient(135deg, rgba(139,92,246,0.12), rgba(6,182,212,0.08));
+  background: linear-gradient(135deg, rgba(0,184,148,0.08), rgba(9,132,227,0.05));
   border-radius: var(--radius-lg);
-  border: 1px solid rgba(139,92,246,0.3);
+  border: 1px solid rgba(0,184,148,0.25);
   backdrop-filter: var(--glass-blur);
   -webkit-backdrop-filter: var(--glass-blur);
   transition: all var(--transition-smooth);
   border-left: 4px solid;
-  border-image: linear-gradient(to bottom, #8b5cf6, #06b6d4) 1;
+  border-image: linear-gradient(to bottom, #00b894, #0984e3) 1;
   position: relative;
   overflow: hidden;
 }
@@ -692,13 +783,13 @@ if (import.meta.client) {
   content: '';
   position: absolute;
   inset: 0;
-  background: radial-gradient(ellipse at top left, rgba(139,92,246,0.06), transparent 60%);
+  background: radial-gradient(ellipse at top left, rgba(0,184,148,0.04), transparent 60%);
   pointer-events: none;
 }
 
 .article-featured:hover {
-  border-color: rgba(139,92,246,0.5);
-  box-shadow: var(--glass-shadow), var(--shadow-glow);
+  border-color: rgba(0,184,148,0.4);
+  box-shadow: var(--shadow-lg), var(--shadow-glow);
   transform: translateY(-4px);
 }
 
@@ -731,13 +822,13 @@ if (import.meta.client) {
   font-family: var(--font-chinese);
   font-size: clamp(1.2rem, 2.5vw, 1.6rem);
   font-weight: 700;
-  color: rgba(255,255,255,0.95);
+  color: var(--color-dark);
   margin-bottom: 0.7rem;
   line-height: 1.4;
   transition: color var(--transition-fast);
 }
 
-.article-featured:hover .featured-title { color: #c4b5fd; }
+.article-featured:hover .featured-title { color: var(--color-accent); }
 
 .featured-meta {
   display: flex;
@@ -809,7 +900,7 @@ if (import.meta.client) {
   font-family: var(--font-chinese);
   font-size: 1.15rem;
   font-weight: 600;
-  color: rgba(255, 255, 255, 0.9);
+  color: var(--color-text);
   margin-bottom: 0.5rem;
   line-height: 1.5;
   overflow: hidden;
@@ -819,7 +910,7 @@ if (import.meta.client) {
 }
 
 .article-card:hover .article-card-title {
-  color: #a78bfa;
+  color: var(--color-accent);
 }
 
 .article-card-meta {
@@ -922,6 +1013,117 @@ if (import.meta.client) {
   color: white;
 }
 
+/* ===== Featured Section ===== */
+.featured-section {
+  padding: var(--space-2xl) 0 0;
+}
+
+.featured-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-lg);
+}
+
+.featured-card {
+  padding: var(--space-xl);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-border);
+  transition: all var(--transition-smooth);
+  position: relative;
+  overflow: hidden;
+}
+
+.featured-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
+}
+
+.featured-card-link {
+  text-decoration: none;
+  color: inherit;
+  display: block;
+}
+
+.featured-card-accent {
+  width: 40px;
+  height: 4px;
+  background: linear-gradient(90deg, var(--color-accent), var(--color-accent-cyan));
+  border-radius: 2px;
+  margin-bottom: var(--space-md);
+}
+
+.featured-card-title {
+  font-family: var(--font-chinese);
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--color-text);
+  margin-bottom: var(--space-sm);
+  line-height: 1.5;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.featured-card-meta {
+  font-family: var(--font-chinese);
+  font-size: 0.78rem;
+  color: var(--color-text-muted);
+  display: flex;
+  gap: 0.4rem;
+  align-items: center;
+}
+
+/* ===== Tag Cloud ===== */
+.tag-cloud-section {
+  padding: var(--space-2xl) 0 0;
+}
+
+.tag-cloud {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+  justify-content: center;
+}
+
+.tag-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.4rem 1rem;
+  border-radius: 100px;
+  background: var(--glass-bg);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid var(--color-border);
+  color: var(--color-text-secondary);
+  text-decoration: none;
+  font-family: var(--font-chinese);
+  font-weight: 400;
+  transition: all var(--transition-fast);
+}
+
+.tag-pill:hover {
+  color: var(--color-accent);
+  border-color: var(--color-accent);
+  background: var(--color-accent-light);
+  transform: translateY(-2px);
+}
+
+.tag-pill-count {
+  font-size: 0.7rem;
+  color: var(--color-text-muted);
+  background: var(--color-border-light);
+  padding: 0.1rem 0.4rem;
+  border-radius: 100px;
+}
+
+.tag-empty {
+  font-family: var(--font-chinese);
+  color: var(--color-text-muted);
+  font-size: 0.9rem;
+}
+
 /* ===== Responsive ===== */
 @media (max-width: 768px) {
   .hero { min-height: 55vh; }
@@ -937,6 +1139,7 @@ if (import.meta.client) {
   .article-card-arrow { display: none; }
   .featured-arrow { display: none; }
   .pagination { flex-wrap: wrap; }
+  .featured-grid { grid-template-columns: 1fr; }
 }
 
 /* ===== Reduced motion ===== */

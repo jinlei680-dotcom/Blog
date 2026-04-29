@@ -88,8 +88,8 @@
                   viewBox="0 0 24 24"
                   width="22"
                   height="22"
-                  :fill="liked ? '#a78bfa' : 'none'"
-                  :stroke="liked ? '#a78bfa' : 'currentColor'"
+                  :fill="liked ? '#ff7675' : 'none'"
+                  :stroke="liked ? '#ff7675' : 'currentColor'"
                   stroke-width="2"
                   stroke-linecap="round"
                   stroke-linejoin="round"
@@ -109,8 +109,8 @@
               :aria-label="isBookmarkedState ? '取消收藏' : '收藏'"
             >
               <svg viewBox="0 0 24 24" width="18" height="18"
-                :fill="isBookmarkedState ? '#a78bfa' : 'none'"
-                :stroke="isBookmarkedState ? '#a78bfa' : 'currentColor'"
+                :fill="isBookmarkedState ? '#00b894' : 'none'"
+                :stroke="isBookmarkedState ? '#00b894' : 'currentColor'"
                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
               </svg>
@@ -420,7 +420,7 @@ function formatDate(dateStr) {
   left: 0;
   right: 0;
   height: 3px;
-  background: rgba(255,255,255,0.06);
+  background: var(--color-border-light);
   z-index: 200;
 }
 
@@ -471,14 +471,14 @@ function formatDate(dateStr) {
 .article-hero-img {
   position: absolute;
   inset: 0;
-  background: url('/images/article-hero.jpg') center / cover;
+  background: url('/images/article-hero-light.jpg') center / cover;
   opacity: 0.2;
 }
 
 .article-hero-fade {
   position: absolute;
   inset: 0;
-  background: linear-gradient(to bottom, transparent 0%, #0f0c29 100%);
+  background: linear-gradient(to bottom, transparent 0%, var(--color-bg) 100%);
 }
 
 .article-detail {
@@ -510,7 +510,7 @@ function formatDate(dateStr) {
 
 .detail-error h2 {
   font-size: 1.3rem;
-  color: rgba(255, 255, 255, 0.9);
+  color: var(--color-text);
   margin-bottom: var(--space-sm);
 }
 
@@ -554,7 +554,7 @@ function formatDate(dateStr) {
   font-family: var(--font-chinese);
   font-size: clamp(1.8rem, 4vw, 2.6rem);
   font-weight: 700;
-  background: linear-gradient(135deg, rgba(255,255,255,0.95), #a78bfa);
+  background: linear-gradient(135deg, rgba(255,255,255,0.95), var(--color-accent));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -599,9 +599,9 @@ function formatDate(dateStr) {
   font-family: var(--font-chinese);
   font-size: 0.8rem;
   font-weight: 500;
-  color: #a78bfa;
-  background: rgba(139, 92, 246, 0.15);
-  border: 1px solid rgba(139, 92, 246, 0.3);
+  color: var(--color-accent);
+  background: rgba(0, 184, 148, 0.15);
+  border: 1px solid rgba(0, 184, 148, 0.3);
   border-radius: 100px;
   text-decoration: none;
   transition: all var(--transition-fast);
@@ -612,7 +612,7 @@ function formatDate(dateStr) {
   background: var(--color-accent);
   color: white;
   transform: translateY(-1px);
-  box-shadow: 0 4px 16px rgba(139, 92, 246, 0.35);
+  box-shadow: 0 4px 16px rgba(0, 184, 148, 0.35);
   border-color: transparent;
 }
 
@@ -649,9 +649,9 @@ function formatDate(dateStr) {
 }
 
 .btn-edit {
-  background: rgba(139, 92, 246, 0.15);
-  color: #a78bfa;
-  border: 1.5px solid rgba(139, 92, 246, 0.4);
+  background: rgba(0, 184, 148, 0.15);
+  color: var(--color-accent);
+  border: 1.5px solid rgba(0, 184, 148, 0.4);
   backdrop-filter: blur(8px);
 }
 
@@ -716,19 +716,19 @@ function formatDate(dateStr) {
 }
 
 .like-btn:hover {
-  border-color: #a78bfa;
-  color: #a78bfa;
-  background: rgba(139, 92, 246, 0.1);
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+  background: rgba(0, 184, 148, 0.1);
 }
 
 .like-btn--liked {
-  border-color: #a78bfa;
-  color: #a78bfa;
-  background: rgba(139, 92, 246, 0.12);
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+  background: rgba(0, 184, 148, 0.12);
 }
 
 .like-btn--liked:hover {
-  background: rgba(139, 92, 246, 0.2);
+  background: rgba(0, 184, 148, 0.2);
 }
 
 .like-btn:disabled {
@@ -788,7 +788,7 @@ function formatDate(dateStr) {
   font-family: var(--font-chinese);
   font-size: 1.2rem;
   font-weight: 600;
-  color: rgba(255, 255, 255, 0.9);
+  color: var(--color-text);
   margin-bottom: var(--space-lg);
 }
 
@@ -854,7 +854,7 @@ function formatDate(dateStr) {
   font-family: var(--font-chinese);
   font-size: 1.2rem;
   font-weight: 600;
-  color: rgba(255, 255, 255, 0.9);
+  color: var(--color-text);
   margin-bottom: var(--space-sm);
 }
 
@@ -922,15 +922,15 @@ function formatDate(dateStr) {
 }
 
 .action-btn:hover {
-  border-color: rgba(139, 92, 246, 0.5);
-  color: #a78bfa;
-  background: rgba(139, 92, 246, 0.1);
+  border-color: rgba(0, 184, 148, 0.5);
+  color: var(--color-accent);
+  background: rgba(0, 184, 148, 0.1);
 }
 
 .action-btn--active {
-  border-color: rgba(139, 92, 246, 0.6);
-  color: #a78bfa;
-  background: rgba(139, 92, 246, 0.15);
+  border-color: rgba(0, 184, 148, 0.6);
+  color: var(--color-accent);
+  background: rgba(0, 184, 148, 0.15);
 }
 
 /* ===== Share Toast ===== */
@@ -942,14 +942,14 @@ function formatDate(dateStr) {
   background: rgba(15, 12, 41, 0.92);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(139, 92, 246, 0.4);
+  border: 1px solid rgba(0, 184, 148, 0.4);
   border-radius: 100px;
   padding: 0.65rem 1.5rem;
   font-family: var(--font-chinese);
   font-size: 0.88rem;
-  color: #a78bfa;
+  color: var(--color-accent);
   z-index: 300;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), 0 0 20px rgba(139, 92, 246, 0.2);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), 0 0 20px rgba(0, 184, 148, 0.2);
   white-space: nowrap;
 }
 

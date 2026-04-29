@@ -9,9 +9,11 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class TagDTO {
+public class SiteStatsDTO {
 
-    private Long id;
-    private String name;
     private long articleCount;
+    private long totalWords;
+    private long totalLikes;
+    private long userCount;
+    private long commentCount;
 }

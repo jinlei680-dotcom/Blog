@@ -191,7 +191,7 @@ async function handleRegister() {
   font-family: var(--font-display);
   font-size: 2.2rem;
   font-weight: 700;
-  background: linear-gradient(135deg, #a78bfa, #06b6d4);
+  background: linear-gradient(135deg, var(--color-accent), var(--color-accent-cyan));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -239,7 +239,7 @@ async function handleRegister() {
   font-family: var(--font-body);
   font-size: 0.95rem;
   color: var(--color-text);
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--color-border-light);
   border: 1.5px solid var(--glass-border);
   border-radius: var(--radius-sm);
   outline: none;
@@ -253,8 +253,8 @@ async function handleRegister() {
 
 .form-input:focus {
   border-color: var(--color-accent);
-  background: rgba(139, 92, 246, 0.08);
-  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.15);
+  background: rgba(0, 184, 148, 0.08);
+  box-shadow: 0 0 0 3px rgba(0, 184, 148, 0.15);
 }
 
 .has-error .form-input {
@@ -318,7 +318,7 @@ async function handleRegister() {
 .btn-primary:hover:not(:disabled) {
   opacity: 0.9;
   transform: translateY(-2px);
-  box-shadow: 0 8px 30px rgba(139, 92, 246, 0.4);
+  box-shadow: 0 8px 30px rgba(0, 184, 148, 0.4);
 }
 
 .btn-primary:disabled {
@@ -334,7 +334,7 @@ async function handleRegister() {
   display: inline-block;
   width: 16px;
   height: 16px;
-  border: 2px solid rgba(255, 255, 255, 0.3);
+  border: 2px solid var(--color-border);
   border-top-color: white;
   border-radius: 50%;
   margin-right: 0.5rem;

@@ -60,6 +60,20 @@ public class ArticleController {
         return ApiResponse.success(results);
     }
 
+    @GetMapping("/featured")
+    public ApiResponse<Page<ArticleSummaryDTO>> listFeatured(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        Page<ArticleSummaryDTO> articles = articleService.listFeatured(page, size);
+        return ApiResponse.success(articles);
+    }
+
+    @GetMapping("/stats")
+    public ApiResponse<SiteStatsDTO> getSiteStats() {
+        SiteStatsDTO stats = articleService.getSiteStats();
+        return ApiResponse.success(stats);
+    }
+
     @GetMapping("/{id}")
     public ApiResponse<ArticleDetailDTO> getDetail(@PathVariable Long id) {
         Long currentUserId = getCurrentUserIdOrNull();

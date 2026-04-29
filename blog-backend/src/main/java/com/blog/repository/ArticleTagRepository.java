@@ -18,4 +18,6 @@ public interface ArticleTagRepository extends JpaRepository<ArticleTag, Long> {
     void deleteByArticleId(Long articleId);
 
     void deleteByTagId(Long tagId);
+
+    long countByTagId(Long tagId);
 }
